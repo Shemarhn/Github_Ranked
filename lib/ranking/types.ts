@@ -30,6 +30,41 @@ export type Tier =
  */
 export type Division = 'IV' | 'III' | 'II' | 'I';
 
+/**
+ * Ordered list of tier values for validation and UI usage.
+ */
+export const TIERS: readonly Tier[] = [
+  'Iron',
+  'Bronze',
+  'Silver',
+  'Gold',
+  'Platinum',
+  'Emerald',
+  'Diamond',
+  'Master',
+  'Grandmaster',
+  'Challenger',
+];
+
+/**
+ * Ordered list of division values (lowest to highest).
+ */
+export const DIVISIONS: readonly Division[] = ['IV', 'III', 'II', 'I'];
+
+/**
+ * Runtime type guard for `Tier`.
+ */
+export function isTier(value: unknown): value is Tier {
+  return typeof value === 'string' && TIERS.includes(value as Tier);
+}
+
+/**
+ * Runtime type guard for `Division`.
+ */
+export function isDivision(value: unknown): value is Division {
+  return typeof value === 'string' && DIVISIONS.includes(value as Division);
+}
+
 // ============================================================================
 // Rank Result Types
 // ============================================================================

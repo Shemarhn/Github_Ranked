@@ -135,3 +135,33 @@ export interface RateLimitInfo {
   remaining: number;
   resetAt: string;
 }
+
+// ============================================================================
+// Type Guards
+// ============================================================================
+
+const isFiniteNumber = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value);
+
+/**
+ * Runtime type guard for `AggregatedStats`.
+ */
+export function isAggregatedStats(value: unknown): value is AggregatedStats {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const record = value as Record<string, unknown>;
+
+  return (
+    isFiniteNumber(record.totalCommits) &&
+    isFiniteNumber(record.totalMergedPRs) &&
+    isFiniteNumber(record.totalCodeReviews) &&
+    isFiniteNumber(record.totalIssuesClosed) &&
+    isFiniteNumber(record.totalStars) &&
+    isFiniteNumber(record.totalFollowers) &&
+    isFiniteNumber(record.firstContributionYear) &&
+    isFiniteNumber(record.lastContributionYear) &&
+    isFiniteNumber(record.yearsActive)
+  );
+}
