@@ -247,18 +247,18 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **ID**: P1-T8
 - **Description**: Create constants file with all ranking algorithm constants
 - **Acceptance Criteria**:
-  - [ ] `MEAN_LOG_SCORE` constant defined (6.5)
-  - [ ] `STD_DEV` constant defined (1.5)
-  - [ ] `BASE_ELO` constant defined (1200)
-  - [ ] `ELO_PER_SIGMA` constant defined (400)
-  - [ ] Metric weights defined
-  - [ ] Rank thresholds defined (Elo ranges)
-  - [ ] Tier colors defined
-  - [ ] All constants exported from `lib/ranking/constants.ts`
+  - [x] `MEAN_LOG_SCORE` constant defined (6.5)
+  - [x] `STD_DEV` constant defined (1.5)
+  - [x] `BASE_ELO` constant defined (1200)
+  - [x] `ELO_PER_SIGMA` constant defined (400)
+  - [x] Metric weights defined
+  - [x] Rank thresholds defined (Elo ranges)
+  - [x] Tier colors defined
+  - [x] All constants exported from `lib/ranking/constants.ts`
 - **Estimated Time**: 1 hour
 - **Dependencies**: P0-T3
 - **Priority**: Critical
-- **Status**: 🔴 Not Started
+- **Status**: 🟢 Completed
 
 **Phase 1 Total Estimated Time**: 8 hours
 
