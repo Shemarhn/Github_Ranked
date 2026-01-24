@@ -453,12 +453,53 @@ describe('calculateRank', () => {
 
 ## Behavioral Guidelines
 
+### Task Execution Workflow (CRITICAL)
+
+**MANDATORY PROCESS - MUST FOLLOW FOR EVERY TASK:**
+
+1. **Sequential Task Execution**
+   - Tasks MUST be completed one at a time, in order
+   - NEVER skip ahead to the next task until the current one is 100% complete
+   - Only move forward when ALL acceptance criteria are met
+
+2. **Acceptance Criteria Verification**
+   - A task is NOT complete until every single acceptance criterion is checked off
+   - Each checkbox in the acceptance criteria must be verified
+   - No assumptions - if criteria says "test passes", you must actually run the test
+
+3. **Testing Before Proceeding**
+   - ALWAYS run tests before marking a task complete
+   - Required tests for every task:
+     - `npm run build` - Must pass without errors
+     - `npm run lint` - Must pass without warnings
+     - `npx tsc --noEmit` - TypeScript must compile cleanly
+     - Any task-specific tests (unit tests, integration tests, etc.)
+   - If ANY test fails, the task is NOT complete
+
+4. **Immediate Task Completion Marking**
+   - Mark tasks as complete in TASKS.md the SECOND all criteria are met
+   - Update the checkbox items [x] and status to 🟢 Completed
+   - Commit the updated TASKS.md immediately after completion
+
+5. **Never Assume - Always Verify**
+   - If uncertain about a package version, look it up on npm
+   - If uncertain about a configuration, search online or check official docs
+   - If uncertain about Node.js features, verify against Node.js 24.13.0 documentation
+   - Use `npm info <package>` to verify package details
+   - Use web search to verify current best practices
+
+6. **Documentation of Completion**
+   - Each completed task should have a git commit
+   - Commit message should reference the task ID (e.g., "feat: implement P1-T2")
+   - Include what was accomplished and what tests were run
+
 ### When Writing Code
 1. **Always check the Architecture.md** before implementing a new module
 2. **Follow the type definitions** in `lib/*/types.ts`
 3. **Use Zod schemas** for all external data validation
 4. **Add JSDoc comments** for all public functions
 5. **Write tests** alongside implementation (TDD preferred)
+6. **Run all tests before marking any task complete**
 
 ### When Making Decisions
 1. **Performance vs Accuracy**: Prefer accuracy for ranking, performance for caching
