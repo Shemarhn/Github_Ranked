@@ -3,7 +3,7 @@
  * Fetches and aggregates GitHub contribution statistics
  */
 
-import { UserNotFoundError } from '@/lib/utils/errors';
+import { GitHubAPIError, UserNotFoundError } from '@/lib/utils/errors';
 import { TokenPoolManager } from './tokenPool';
 import { buildContributionYearsQuery, buildUserStatsQuery, getYearDates } from './queries';
 import {
@@ -145,6 +145,64 @@ export async function fetchYearlyStats(
     issues: collection.totalIssueContributions,
     privateContributions: collection.restrictedContributionsCount,
   };
+}
+
+export interface YearlyStatsBatchResult {
+  stats: YearlyStats[];
+  failedYears: number[];
+}
+
+/**
+ * Fetch yearly stats for multiple years in parallel.
+ *
+ * @param username - GitHub username
+ * @param years - List of years to fetch
+ * @param token - Optional GitHub Personal Access Token
+ * @returns Batch result with successful stats and failed years
+ */
+export async function fetchYearlyStatsForYears(
+  username: string,
+  years: number[],
+  token?: string
+): Promise<YearlyStatsBatchResult> {
+  if (years.length === 0) {
+    return { stats: [], failedYears: [] };
+  }
+
+  const results = await Promise.all(
+    years.map(async (year) => {
+      try {
+        const stats = await fetchYearlyStats(username, year, token);
+        return { status: 'fulfilled' as const, year, value: stats };
+      } catch (error) {
+        return { status: 'rejected' as const, year, reason: error };
+      }
+    })
+  );
+
+  const failedYears = results
+    .filter((result) => result.status === 'rejected')
+    .map((result) => result.year);
+
+  const userNotFound = results.find(
+    (result) => result.status === 'rejected' && result.reason instanceof UserNotFoundError
+  );
+
+  if (userNotFound) {
+    throw userNotFound.reason;
+  }
+
+  const stats = results
+    .filter((result) => result.status === 'fulfilled')
+    .map((result) => result.value);
+
+  if (stats.length === 0) {
+    throw new GitHubAPIError('Failed to fetch yearly stats for all requested years', {
+      years,
+    });
+  }
+
+  return { stats, failedYears };
 }
 
 /**

@@ -395,15 +395,15 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **ID**: P2-T10
 - **Description**: Fetch stats for multiple years in parallel
 - **Acceptance Criteria**:
-  - [ ] Years fetched using `Promise.all()`
-  - [ ] Partial failures handled gracefully
-  - [ ] Results aggregated correctly
-  - [ ] Performance improvement verified (timing tests)
-  - [ ] Unit tests written
+  - [x] Years fetched using `Promise.all()`
+  - [x] Partial failures handled gracefully
+  - [x] Results aggregated correctly
+  - [x] Performance improvement verified (timing tests)
+  - [x] Unit tests written
 - **Estimated Time**: 1.5 hours
 - **Dependencies**: P2-T9
 - **Priority**: High
-- **Status**: 🔴 Not Started
+- **Status**: 🟢 Completed
 
 ### P2-T11: Implement All-Time Stats Aggregator
 - **ID**: P2-T11
