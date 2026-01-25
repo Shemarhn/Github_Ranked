@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { calculateWPI, calculateZScore, calculateElo } from '@/lib/ranking/engine';
+import { calculateWPI, calculateZScore, calculateElo, getTier } from '@/lib/ranking/engine';
 import type { AggregatedStats } from '@/lib/github/types';
 import { MEAN_LOG_SCORE, STD_DEV, BASE_ELO, ELO_PER_SIGMA } from '@/lib/ranking/constants';
 
@@ -473,5 +473,138 @@ describe('Ranking Engine - calculateElo', () => {
     const elo2 = calculateElo(zScore2);
 
     expect(elo2).toBeGreaterThan(elo1);
+  });
+});
+
+describe('Ranking Engine - getTier', () => {
+  it('should return Iron for Elo 0-599', () => {
+    expect(getTier(0)).toBe('Iron');
+    expect(getTier(299)).toBe('Iron');
+    expect(getTier(599)).toBe('Iron');
+  });
+
+  it('should return Bronze for Elo 600-899', () => {
+    expect(getTier(600)).toBe('Bronze');
+    expect(getTier(750)).toBe('Bronze');
+    expect(getTier(899)).toBe('Bronze');
+  });
+
+  it('should return Silver for Elo 900-1199', () => {
+    expect(getTier(900)).toBe('Silver');
+    expect(getTier(1050)).toBe('Silver');
+    expect(getTier(1199)).toBe('Silver');
+  });
+
+  it('should return Gold for Elo 1200-1499', () => {
+    expect(getTier(1200)).toBe('Gold');
+    expect(getTier(1350)).toBe('Gold');
+    expect(getTier(1499)).toBe('Gold');
+  });
+
+  it('should return Platinum for Elo 1500-1699', () => {
+    expect(getTier(1500)).toBe('Platinum');
+    expect(getTier(1600)).toBe('Platinum');
+    expect(getTier(1699)).toBe('Platinum');
+  });
+
+  it('should return Emerald for Elo 1700-1999', () => {
+    expect(getTier(1700)).toBe('Emerald');
+    expect(getTier(1850)).toBe('Emerald');
+    expect(getTier(1999)).toBe('Emerald');
+  });
+
+  it('should return Diamond for Elo 2000-2399', () => {
+    expect(getTier(2000)).toBe('Diamond');
+    expect(getTier(2200)).toBe('Diamond');
+    expect(getTier(2399)).toBe('Diamond');
+  });
+
+  it('should return Master for Elo 2400-2599', () => {
+    expect(getTier(2400)).toBe('Master');
+    expect(getTier(2500)).toBe('Master');
+    expect(getTier(2599)).toBe('Master');
+  });
+
+  it('should return Grandmaster for Elo 2600-2999', () => {
+    expect(getTier(2600)).toBe('Grandmaster');
+    expect(getTier(2800)).toBe('Grandmaster');
+    expect(getTier(2999)).toBe('Grandmaster');
+  });
+
+  it('should return Challenger for Elo 3000+', () => {
+    expect(getTier(3000)).toBe('Challenger');
+    expect(getTier(3500)).toBe('Challenger');
+    expect(getTier(5000)).toBe('Challenger');
+  });
+
+  it('should handle boundary values correctly', () => {
+    // Lower boundaries (inclusive)
+    expect(getTier(0)).toBe('Iron');
+    expect(getTier(600)).toBe('Bronze');
+    expect(getTier(900)).toBe('Silver');
+    expect(getTier(1200)).toBe('Gold');
+    expect(getTier(1500)).toBe('Platinum');
+    expect(getTier(1700)).toBe('Emerald');
+    expect(getTier(2000)).toBe('Diamond');
+    expect(getTier(2400)).toBe('Master');
+    expect(getTier(2600)).toBe('Grandmaster');
+    expect(getTier(3000)).toBe('Challenger');
+  });
+
+  it('should handle values just below tier boundaries', () => {
+    // Upper boundaries (exclusive)
+    expect(getTier(599)).toBe('Iron');
+    expect(getTier(899)).toBe('Bronze');
+    expect(getTier(1199)).toBe('Silver');
+    expect(getTier(1499)).toBe('Gold');
+    expect(getTier(1699)).toBe('Platinum');
+    expect(getTier(1999)).toBe('Emerald');
+    expect(getTier(2399)).toBe('Diamond');
+    expect(getTier(2599)).toBe('Master');
+    expect(getTier(2999)).toBe('Grandmaster');
+  });
+
+  it('should handle median developer (Gold tier)', () => {
+    const elo = 1200; // BASE_ELO
+    const tier = getTier(elo);
+
+    expect(tier).toBe('Gold');
+  });
+
+  it('should return consistent results for same input', () => {
+    const elo = 1750;
+
+    const tier1 = getTier(elo);
+    const tier2 = getTier(elo);
+    const tier3 = getTier(elo);
+
+    expect(tier1).toBe(tier2);
+    expect(tier2).toBe(tier3);
+    expect(tier1).toBe('Emerald');
+  });
+
+  it('should handle all 10 tiers', () => {
+    // Verify all tiers are accessible
+    const tierElos = [
+      { elo: 300, tier: 'Iron' },
+      { elo: 750, tier: 'Bronze' },
+      { elo: 1050, tier: 'Silver' },
+      { elo: 1350, tier: 'Gold' },
+      { elo: 1600, tier: 'Platinum' },
+      { elo: 1850, tier: 'Emerald' },
+      { elo: 2200, tier: 'Diamond' },
+      { elo: 2500, tier: 'Master' },
+      { elo: 2800, tier: 'Grandmaster' },
+      { elo: 3200, tier: 'Challenger' },
+    ];
+
+    tierElos.forEach(({ elo, tier }) => {
+      expect(getTier(elo)).toBe(tier);
+    });
+  });
+
+  it('should handle very high Elo values', () => {
+    expect(getTier(10000)).toBe('Challenger');
+    expect(getTier(999999)).toBe('Challenger');
   });
 });

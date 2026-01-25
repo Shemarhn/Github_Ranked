@@ -472,15 +472,15 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **ID**: P3-T4
 - **Description**: Create function to determine tier from Elo
 - **Acceptance Criteria**:
-  - [ ] `getTier()` function created
-  - [ ] Function correctly maps all Elo ranges to tiers
-  - [ ] All 10 tiers supported (Iron → Challenger)
-  - [ ] Boundary conditions handled correctly
-  - [ ] Unit tests for all tiers
+  - [x] `getTier()` function created
+  - [x] Function correctly maps all Elo ranges to tiers
+  - [x] All 10 tiers supported (Iron → Challenger)
+  - [x] Boundary conditions handled correctly
+  - [x] Unit tests for all tiers
 - **Estimated Time**: 2 hours
 - **Dependencies**: P3-T3, P1-T8
 - **Priority**: Critical
-- **Status**: � Not Started
+- **Status**: 🟢 Completed
 
 ### P3-T5: Implement Division Calculator
 - **ID**: P3-T5

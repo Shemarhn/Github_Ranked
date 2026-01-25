@@ -4,6 +4,7 @@
  */
 
 import type { AggregatedStats } from '@/lib/github/types';
+import type { Tier } from './types';
 import {
   METRIC_WEIGHTS,
   MAX_STARS_CAP,
@@ -11,6 +12,7 @@ import {
   STD_DEV,
   BASE_ELO,
   ELO_PER_SIGMA,
+  TIER_THRESHOLDS,
 } from './constants';
 
 /**
@@ -105,4 +107,46 @@ export function calculateElo(zScore: number): number {
 
   // Clamp to minimum of 0 (no upper limit - Challenger can exceed 3000)
   return Math.max(roundedElo, 0);
+}
+
+/**
+ * Get tier from Elo rating
+ *
+ * Maps an Elo rating to its corresponding tier based on defined thresholds.
+ * Tier ranges follow League of Legends / Valorant ranking system.
+ *
+ * @param elo - Elo rating
+ * @returns Tier (Iron through Challenger)
+ *
+ * @example
+ * ```typescript
+ * const elo = 1650;
+ * const tier = getTier(elo); // Returns 'Platinum'
+ * ```
+ */
+export function getTier(elo: number): Tier {
+  // Iterate through tiers in reverse order (highest to lowest)
+  // This ensures Challenger (3000+) is checked first
+  const tiers: Tier[] = [
+    'Challenger',
+    'Grandmaster',
+    'Master',
+    'Diamond',
+    'Emerald',
+    'Platinum',
+    'Gold',
+    'Silver',
+    'Bronze',
+    'Iron',
+  ];
+
+  for (const tier of tiers) {
+    const { min, max } = TIER_THRESHOLDS[tier];
+    if (elo >= min && elo < max) {
+      return tier;
+    }
+  }
+
+  // Fallback to Iron for any Elo below 0 (shouldn't happen due to clamping)
+  return 'Iron';
 }
