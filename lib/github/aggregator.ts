@@ -5,17 +5,30 @@
 
 import { UserNotFoundError } from '@/lib/utils/errors';
 import { TokenPoolManager } from './tokenPool';
-import { buildContributionYearsQuery } from './queries';
+import { buildContributionYearsQuery, buildUserStatsQuery, getYearDates } from './queries';
 import {
   executeGraphQLQueryWithRetry,
   parseRateLimitFromResponse,
 } from './client';
-import type { GraphQLResponse, RateLimitInfo } from './types';
+import type { GraphQLResponse, RateLimitInfo, YearlyStats } from './types';
 
 interface ContributionYearsResponse {
   user: {
     contributionsCollection: {
       contributionYears?: number[];
+    };
+  } | null;
+  rateLimit?: RateLimitInfo;
+}
+
+interface UserStatsResponse {
+  user: {
+    contributionsCollection: {
+      totalCommitContributions: number;
+      totalPullRequestContributions: number;
+      totalPullRequestReviewContributions: number;
+      totalIssueContributions: number;
+      restrictedContributionsCount: number;
     };
   } | null;
   rateLimit?: RateLimitInfo;
@@ -91,6 +104,47 @@ export async function fetchContributionYears(
   }
 
   return data.user.contributionsCollection.contributionYears ?? [];
+}
+
+/**
+ * Fetch contribution statistics for a specific year.
+ *
+ * @param username - GitHub username
+ * @param year - Contribution year (UTC)
+ * @param token - Optional GitHub Personal Access Token
+ * @returns YearlyStats for the requested year
+ * @throws UserNotFoundError if user does not exist
+ */
+export async function fetchYearlyStats(
+  username: string,
+  year: number,
+  token?: string
+): Promise<YearlyStats> {
+  const { from, to } = getYearDates(year);
+  const resolved = resolveToken(token);
+  const request = buildUserStatsQuery(username, from, to);
+  const response = await executeGraphQLQueryWithRetry<UserStatsResponse>(
+    request,
+    resolved.token
+  );
+
+  applyRateLimitUpdate(response, resolved.token, resolved.useTokenPool);
+
+  const data = response.data;
+  if (!data?.user) {
+    throw new UserNotFoundError(username);
+  }
+
+  const collection = data.user.contributionsCollection;
+
+  return {
+    year,
+    commits: collection.totalCommitContributions,
+    prs: collection.totalPullRequestContributions,
+    reviews: collection.totalPullRequestReviewContributions,
+    issues: collection.totalIssueContributions,
+    privateContributions: collection.restrictedContributionsCount,
+  };
 }
 
 /**

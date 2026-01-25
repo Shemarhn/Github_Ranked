@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { fetchContributionYears } from '@/lib/github/aggregator';
+import { fetchContributionYears, fetchYearlyStats } from '@/lib/github/aggregator';
 import { UserNotFoundError } from '@/lib/utils/errors';
 
 vi.mock('@/lib/github/client', async () => {
@@ -43,5 +43,32 @@ describe('GitHub aggregator', () => {
     await expect(fetchContributionYears('missing-user', 'ghp_test')).rejects.toBeInstanceOf(
       UserNotFoundError
     );
+  });
+
+  it('fetches yearly contribution stats', async () => {
+    vi.mocked(executeGraphQLQueryWithRetry).mockResolvedValueOnce({
+      data: {
+        user: {
+          contributionsCollection: {
+            totalCommitContributions: 120,
+            totalPullRequestContributions: 15,
+            totalPullRequestReviewContributions: 8,
+            totalIssueContributions: 6,
+            restrictedContributionsCount: 2,
+          },
+        },
+      },
+    });
+
+    const result = await fetchYearlyStats('octocat', 2024, 'ghp_test');
+
+    expect(result).toEqual({
+      year: 2024,
+      commits: 120,
+      prs: 15,
+      reviews: 8,
+      issues: 6,
+      privateContributions: 2,
+    });
   });
 });
