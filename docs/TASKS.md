@@ -458,15 +458,15 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **ID**: P3-T3
 - **Description**: Create function to calculate Elo from Z-score
 - **Acceptance Criteria**:
-  - [ ] `calculateElo()` function created
-  - [ ] Function uses formula: 1200 + (Z-Score × 400)
-  - [ ] Function rounds to nearest integer
-  - [ ] Function clamps minimum to 0
-  - [ ] Unit tests with known Z-scores
+  - [x] `calculateElo()` function created
+  - [x] Function uses formula: 1200 + (Z-Score × 400)
+  - [x] Function rounds to nearest integer
+  - [x] Function clamps minimum to 0
+  - [x] Unit tests with known Z-scores
 - **Estimated Time**: 1 hour
 - **Dependencies**: P3-T2
 - **Priority**: Critical
-- **Status**: � Not Started
+- **Status**: 🟢 Completed
 
 ### P3-T4: Implement Tier Assignment
 - **ID**: P3-T4

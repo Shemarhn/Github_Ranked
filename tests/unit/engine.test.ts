@@ -3,9 +3,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { calculateWPI, calculateZScore } from '@/lib/ranking/engine';
+import { calculateWPI, calculateZScore, calculateElo } from '@/lib/ranking/engine';
 import type { AggregatedStats } from '@/lib/github/types';
-import { MEAN_LOG_SCORE, STD_DEV } from '@/lib/ranking/constants';
+import { MEAN_LOG_SCORE, STD_DEV, BASE_ELO, ELO_PER_SIGMA } from '@/lib/ranking/constants';
 
 describe('Ranking Engine - calculateWPI', () => {
   it('should calculate WPI with all metrics', () => {
@@ -338,5 +338,140 @@ describe('Ranking Engine - calculateZScore', () => {
     // (13.816 - 6.5) / 1.5 ≈ 4.877
     expect(zScore).toBeCloseTo(4.877, 2);
     expect(Number.isFinite(zScore)).toBe(true);
+  });
+});
+
+describe('Ranking Engine - calculateElo', () => {
+  it('should calculate Elo from Z-score', () => {
+    const zScore = 1.0; // One standard deviation above mean
+    const elo = calculateElo(zScore);
+
+    // 1200 + (1.0 × 400) = 1600
+    expect(elo).toBe(1600);
+  });
+
+  it('should return BASE_ELO for Z-score of 0', () => {
+    const zScore = 0; // At global mean
+    const elo = calculateElo(zScore);
+
+    // Should return base Elo (Gold IV)
+    expect(elo).toBe(BASE_ELO); // 1200
+  });
+
+  it('should handle positive Z-scores', () => {
+    const zScore = 2.0; // Two standard deviations above mean
+    const elo = calculateElo(zScore);
+
+    // 1200 + (2.0 × 400) = 2000 (Diamond IV)
+    expect(elo).toBe(2000);
+  });
+
+  it('should handle negative Z-scores', () => {
+    const zScore = -1.0; // One standard deviation below mean
+    const elo = calculateElo(zScore);
+
+    // 1200 + (-1.0 × 400) = 800 (Bronze tier)
+    expect(elo).toBe(800);
+  });
+
+  it('should round to nearest integer', () => {
+    const zScore = 1.234; // Results in non-integer Elo
+    const elo = calculateElo(zScore);
+
+    // 1200 + (1.234 × 400) = 1693.6 → 1694
+    expect(elo).toBe(1694);
+    expect(Number.isInteger(elo)).toBe(true);
+  });
+
+  it('should clamp minimum to 0', () => {
+    const zScore = -5.0; // Very low Z-score
+    const elo = calculateElo(zScore);
+
+    // 1200 + (-5.0 × 400) = -800 → 0 (clamped)
+    expect(elo).toBe(0);
+  });
+
+  it('should not clamp maximum (Challenger can exceed 3000)', () => {
+    const zScore = 5.0; // Very high Z-score
+    const elo = calculateElo(zScore);
+
+    // 1200 + (5.0 × 400) = 3200 (Challenger)
+    expect(elo).toBe(3200);
+    expect(elo).toBeGreaterThan(3000);
+  });
+
+  it('should use correct formula constants', () => {
+    const zScore = 1.5;
+    const elo = calculateElo(zScore);
+
+    // Verify formula: BASE_ELO + (zScore × ELO_PER_SIGMA)
+    const expectedElo = Math.round(BASE_ELO + zScore * ELO_PER_SIGMA);
+    expect(elo).toBe(expectedElo);
+  });
+
+  it('should map to Gold tier for median developer', () => {
+    const zScore = 0; // Median developer
+    const elo = calculateElo(zScore);
+
+    // Should be 1200 (Gold IV)
+    expect(elo).toBe(1200);
+    expect(elo).toBeGreaterThanOrEqual(1200); // Gold range: 1200-1499
+    expect(elo).toBeLessThan(1500);
+  });
+
+  it('should map to Diamond tier for high performers', () => {
+    const zScore = 2.0; // ~97.5th percentile
+    const elo = calculateElo(zScore);
+
+    // Should be 2000 (Diamond IV)
+    expect(elo).toBe(2000);
+  });
+
+  it('should handle fractional Z-scores correctly', () => {
+    const zScore = 0.5;
+    const elo = calculateElo(zScore);
+
+    // 1200 + (0.5 × 400) = 1400 (Gold I)
+    expect(elo).toBe(1400);
+  });
+
+  it('should return consistent results for same input', () => {
+    const zScore = 1.75;
+
+    const elo1 = calculateElo(zScore);
+    const elo2 = calculateElo(zScore);
+    const elo3 = calculateElo(zScore);
+
+    expect(elo1).toBe(elo2);
+    expect(elo2).toBe(elo3);
+  });
+
+  it('should handle Challenger tier (3000+)', () => {
+    const zScore = 4.5; // Top 0.0003%
+    const elo = calculateElo(zScore);
+
+    // 1200 + (4.5 × 400) = 3000 (Challenger)
+    expect(elo).toBe(3000);
+    expect(elo).toBeGreaterThanOrEqual(3000);
+  });
+
+  it('should handle Iron tier (0-599)', () => {
+    const zScore = -2.0; // Bottom ~2.5%
+    const elo = calculateElo(zScore);
+
+    // 1200 + (-2.0 × 400) = 400 (Iron tier)
+    expect(elo).toBe(400);
+    expect(elo).toBeGreaterThanOrEqual(0);
+    expect(elo).toBeLessThan(600);
+  });
+
+  it('should produce higher Elo for higher Z-score', () => {
+    const zScore1 = 0.5;
+    const zScore2 = 1.5;
+
+    const elo1 = calculateElo(zScore1);
+    const elo2 = calculateElo(zScore2);
+
+    expect(elo2).toBeGreaterThan(elo1);
   });
 });

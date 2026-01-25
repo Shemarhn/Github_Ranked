@@ -4,7 +4,14 @@
  */
 
 import type { AggregatedStats } from '@/lib/github/types';
-import { METRIC_WEIGHTS, MAX_STARS_CAP, MEAN_LOG_SCORE, STD_DEV } from './constants';
+import {
+  METRIC_WEIGHTS,
+  MAX_STARS_CAP,
+  MEAN_LOG_SCORE,
+  STD_DEV,
+  BASE_ELO,
+  ELO_PER_SIGMA,
+} from './constants';
 
 /**
  * Calculate Weighted Performance Index (WPI)
@@ -68,4 +75,34 @@ export function calculateZScore(wpi: number): number {
   const zScore = (logScore - MEAN_LOG_SCORE) / STD_DEV;
 
   return zScore;
+}
+
+/**
+ * Calculate Elo rating from Z-score
+ *
+ * Converts Z-score into an Elo rating using the formula:
+ * Elo = BASE_ELO + (Z-Score × ELO_PER_SIGMA)
+ *
+ * Where BASE_ELO (1200) represents the median developer (Gold IV)
+ * and each standard deviation equals 400 Elo points.
+ *
+ * @param zScore - Z-score (standard deviations from mean)
+ * @returns Elo rating (minimum 0, no upper limit)
+ *
+ * @example
+ * ```typescript
+ * const zScore = 1.5; // 1.5 standard deviations above mean
+ * const elo = calculateElo(zScore);
+ * // 1200 + (1.5 × 400) = 1800 (Emerald tier)
+ * ```
+ */
+export function calculateElo(zScore: number): number {
+  // Convert Z-score to Elo rating
+  const elo = BASE_ELO + zScore * ELO_PER_SIGMA;
+
+  // Round to nearest integer
+  const roundedElo = Math.round(elo);
+
+  // Clamp to minimum of 0 (no upper limit - Challenger can exceed 3000)
+  return Math.max(roundedElo, 0);
 }
