@@ -298,14 +298,14 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **ID**: P2-T3
 - **Description**: Define GraphQL queries for GitHub API
 - **Acceptance Criteria**:
-  - [ ] `USER_STATS_QUERY` defined
-  - [ ] `CONTRIBUTION_YEARS_QUERY` defined
-  - [ ] Queries match Architecture.md specifications
-  - [ ] Queries exported from `lib/github/queries.ts`
+  - [x] `USER_STATS_QUERY` defined
+  - [x] `CONTRIBUTION_YEARS_QUERY` defined
+  - [x] Queries match Architecture.md specifications
+  - [x] Queries exported from `lib/github/queries.ts`
 - **Estimated Time**: 1 hour
 - **Dependencies**: P0-T3
 - **Priority**: Critical
-- **Status**: 🔴 Not Started
+- **Status**: 🟢 Completed
 
 ### P2-T4: Create Query Builder Functions
 - **ID**: P2-T4
