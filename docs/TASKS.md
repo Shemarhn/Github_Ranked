@@ -282,17 +282,17 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **ID**: P2-T2
 - **Description**: Create TokenPoolManager class with round-robin selection
 - **Acceptance Criteria**:
-  - [ ] `TokenPoolManager` class created
-  - [ ] `selectToken()` method implemented (round-robin)
-  - [ ] `recordUsage()` method implemented
-  - [ ] `isTokenAvailable()` method implemented
-  - [ ] `refreshPool()` method implemented
-  - [ ] Tokens loaded from environment variables
-  - [ ] Unit tests written and passing
+  - [x] `TokenPoolManager` class created
+  - [x] `selectToken()` method implemented (round-robin)
+  - [x] `recordUsage()` method implemented
+  - [x] `isTokenAvailable()` method implemented
+  - [x] `refreshPool()` method implemented
+  - [x] Tokens loaded from environment variables
+  - [x] Unit tests written and passing
 - **Estimated Time**: 2 hours
 - **Dependencies**: P2-T1
 - **Priority**: Critical
-- **Status**: 🔴 Not Started
+- **Status**: 🟢 Completed
 
 ### P2-T3: Create GraphQL Query Strings
 - **ID**: P2-T3
