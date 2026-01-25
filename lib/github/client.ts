@@ -13,6 +13,12 @@ import { GitHubAPIError } from '@/lib/utils/errors';
 const GITHUB_GRAPHQL_ENDPOINT = 'https://api.github.com/graphql';
 
 /**
+ * Retry configuration
+ */
+const MAX_RETRIES = 3;
+const RETRY_DELAYS = [1000, 2000, 4000]; // 1s, 2s, 4s
+
+/**
  * Execute a GraphQL query against the GitHub API.
  *
  * @param request - GraphQL request with query and variables
@@ -140,4 +146,79 @@ export function parseRateLimitFromHeaders(
 		remaining: parseInt(remaining, 10),
 		resetTime: parseInt(reset, 10), // Unix timestamp in seconds
 	};
+}
+
+/**
+ * Check if an error should trigger a retry.
+ * Retries on rate limit errors (403) and server errors (5xx).
+ *
+ * @param error - The error to check
+ * @returns True if the error is retryable
+ */
+function isRetryableError(error: unknown): boolean {
+	if (!(error instanceof GitHubAPIError)) {
+		return false;
+	}
+
+	const statusCode = error.details?.statusCode as number | undefined;
+	if (!statusCode) {
+		return false;
+	}
+
+	// Retry on rate limit (403) and server errors (5xx)
+	return statusCode === 403 || (statusCode >= 500 && statusCode < 600);
+}
+
+/**
+ * Sleep for a specified duration.
+ *
+ * @param ms - Milliseconds to sleep
+ */
+async function sleep(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Execute a GraphQL query with automatic retry on transient errors.
+ * Uses exponential backoff: 1s, 2s, 4s (max 3 retries).
+ *
+ * @param request - GraphQL request with query and variables
+ * @param token - GitHub Personal Access Token
+ * @returns Promise resolving to the GraphQL response
+ * @throws GitHubAPIError if all retries fail
+ */
+export async function executeGraphQLQueryWithRetry<T = unknown>(
+	request: GraphQLRequest,
+	token: string
+): Promise<GraphQLResponse<T>> {
+	let lastError: GitHubAPIError | undefined;
+
+	for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+		try {
+			// Attempt the request
+			return await executeGraphQLQuery<T>(request, token);
+		} catch (error) {
+			// Check if we should retry
+			if (
+				error instanceof GitHubAPIError &&
+				isRetryableError(error) &&
+				attempt < MAX_RETRIES
+			) {
+				lastError = error;
+
+				// Wait with exponential backoff before retrying
+				const delayMs = RETRY_DELAYS[attempt];
+				await sleep(delayMs);
+
+				// Continue to next retry attempt
+				continue;
+			}
+
+			// Non-retryable error or out of retries, throw immediately
+			throw error;
+		}
+	}
+
+	// This should never be reached, but TypeScript needs it
+	throw lastError || new GitHubAPIError('Maximum retries exceeded');
 }

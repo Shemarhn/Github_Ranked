@@ -5,6 +5,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
 	executeGraphQLQuery,
+	executeGraphQLQueryWithRetry,
 	parseRateLimitFromResponse,
 	parseRateLimitFromHeaders,
 } from '@/lib/github/client';
@@ -19,11 +20,13 @@ describe('GitHub GraphQL Client', () => {
 	beforeEach(() => {
 		// Clear mocks before each test
 		mockFetch.mockClear();
+		vi.useRealTimers();
 	});
 
 	afterEach(() => {
 		// Reset mocks after each test
 		vi.resetAllMocks();
+		vi.useRealTimers();
 	});
 
 	describe('executeGraphQLQuery', () => {
@@ -307,6 +310,255 @@ describe('GitHub GraphQL Client', () => {
 
 			const rateLimit = parseRateLimitFromHeaders(headers);
 			expect(rateLimit).toBeNull();
+		});
+	});
+
+	describe('executeGraphQLQueryWithRetry', () => {
+		it('should succeed on first attempt', async () => {
+			const mockResponse: GraphQLResponse<{ user: { login: string } }> = {
+				data: {
+					user: { login: 'octocat' },
+				},
+			};
+
+			mockFetch.mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				json: async () => mockResponse,
+			});
+
+			const request = {
+				query: 'query { user { login } }',
+				variables: {},
+			};
+
+			const result = await executeGraphQLQueryWithRetry(request, 'ghp_token');
+
+			expect(result).toEqual(mockResponse);
+			expect(mockFetch).toHaveBeenCalledTimes(1);
+		});
+
+		it('should retry on 403 rate limit error and succeed', async () => {
+			vi.useFakeTimers();
+
+			// First attempt: 403 rate limit error
+			mockFetch.mockResolvedValueOnce({
+				ok: false,
+				status: 403,
+				statusText: 'Forbidden',
+				json: async () => ({
+					errors: [{ message: 'API rate limit exceeded' }],
+				}),
+			});
+
+			// Second attempt: success
+			mockFetch.mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				json: async () => ({ data: { user: { login: 'octocat' } } }),
+			});
+
+			const request = { query: 'query { }', variables: {} };
+
+			const promise = executeGraphQLQueryWithRetry(request, 'ghp_token');
+
+			await vi.advanceTimersByTimeAsync(0); // Initial attempt fails
+			await vi.advanceTimersByTimeAsync(1000); // First retry succeeds after 1s
+
+			const result = await promise;
+
+			expect(result.data).toBeDefined();
+			expect(mockFetch).toHaveBeenCalledTimes(2);
+
+			vi.useRealTimers();
+		});
+
+		it('should retry on 5xx server error and succeed', async () => {
+			vi.useFakeTimers();
+
+			// First attempt: 502 server error
+			mockFetch.mockResolvedValueOnce({
+				ok: false,
+				status: 502,
+				statusText: 'Bad Gateway',
+				json: async () => ({
+					errors: [{ message: 'Server error' }],
+				}),
+			});
+
+			// Second attempt: success
+			mockFetch.mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				json: async () => ({ data: { user: { login: 'octocat' } } }),
+			});
+
+			const request = { query: 'query { }', variables: {} };
+
+			const promise = executeGraphQLQueryWithRetry(request, 'ghp_token');
+
+			await vi.advanceTimersByTimeAsync(0); // Initial attempt fails
+			await vi.advanceTimersByTimeAsync(1000); // First retry succeeds after 1s
+
+			const result = await promise;
+
+			expect(result.data).toBeDefined();
+			expect(mockFetch).toHaveBeenCalledTimes(2);
+
+			vi.useRealTimers();
+		});
+
+		it('should not retry on 401 unauthorized error', async () => {
+			mockFetch.mockResolvedValue({
+				ok: false,
+				status: 401,
+				statusText: 'Unauthorized',
+				json: async () => ({
+					errors: [{ message: 'Bad credentials' }],
+				}),
+			});
+
+			const request = { query: 'query { }', variables: {} };
+
+			await expect(
+				executeGraphQLQueryWithRetry(request, 'ghp_token')
+			).rejects.toThrow(GitHubAPIError);
+
+			// Should only try once (no retries for 401)
+			expect(mockFetch).toHaveBeenCalledTimes(1);
+		});
+
+		it('should not retry on 404 not found error', async () => {
+			mockFetch.mockResolvedValue({
+				ok: false,
+				status: 404,
+				statusText: 'Not Found',
+				json: async () => ({
+					errors: [{ message: 'Resource not found' }],
+				}),
+			});
+
+			const request = { query: 'query { }', variables: {} };
+
+			await expect(
+				executeGraphQLQueryWithRetry(request, 'ghp_token')
+			).rejects.toThrow(GitHubAPIError);
+
+			// Should only try once (no retries for 404)
+			expect(mockFetch).toHaveBeenCalledTimes(1);
+		});
+
+		it('should retry up to 3 times on 403 errors', async () => {
+			vi.useFakeTimers();
+
+			// All 4 attempts (initial + 3 retries) fail with 403
+			mockFetch.mockResolvedValue({
+				ok: false,
+				status: 403,
+				statusText: 'Forbidden',
+				json: async () => ({
+					errors: [{ message: 'API rate limit exceeded' }],
+				}),
+			});
+
+			const request = { query: 'query { }', variables: {} };
+
+			const promise = executeGraphQLQueryWithRetry(request, 'ghp_token').catch(
+				(e) => e
+			);
+
+			// Advance through all retries
+			await vi.runAllTimersAsync();
+
+			const error = await promise;
+
+			expect(error).toBeInstanceOf(GitHubAPIError);
+			expect(mockFetch).toHaveBeenCalledTimes(4);
+
+			vi.useRealTimers();
+		});
+
+		it('should use exponential backoff delays', async () => {
+			vi.useFakeTimers();
+
+			// All attempts fail with 503
+			mockFetch.mockResolvedValue({
+				ok: false,
+				status: 503,
+				statusText: 'Service Unavailable',
+				json: async () => ({
+					errors: [{ message: 'Service unavailable' }],
+				}),
+			});
+
+			const request = { query: 'query { }', variables: {} };
+
+			// Start the retry attempt
+			const promise = executeGraphQLQueryWithRetry(request, 'ghp_token').catch(
+				(e) => e
+			);
+
+			// First attempt fails immediately
+			await vi.advanceTimersByTimeAsync(0);
+			expect(mockFetch).toHaveBeenCalledTimes(1);
+
+			// Second attempt after 1 second
+			await vi.advanceTimersByTimeAsync(1000);
+			expect(mockFetch).toHaveBeenCalledTimes(2);
+
+			// Third attempt after 2 seconds
+			await vi.advanceTimersByTimeAsync(2000);
+			expect(mockFetch).toHaveBeenCalledTimes(3);
+
+			// Fourth attempt after 4 seconds
+			await vi.advanceTimersByTimeAsync(4000);
+			expect(mockFetch).toHaveBeenCalledTimes(4);
+
+			// Should reject after all retries exhausted
+			const error = await promise;
+			expect(error).toBeInstanceOf(GitHubAPIError);
+
+			vi.useRealTimers();
+		});
+
+		it('should succeed on third retry', async () => {
+			vi.useFakeTimers();
+
+			// First two attempts fail
+			mockFetch.mockResolvedValueOnce({
+				ok: false,
+				status: 503,
+				json: async () => ({ errors: [{ message: 'Service unavailable' }] }),
+			});
+
+			mockFetch.mockResolvedValueOnce({
+				ok: false,
+				status: 503,
+				json: async () => ({ errors: [{ message: 'Service unavailable' }] }),
+			});
+
+			// Third attempt succeeds
+			mockFetch.mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				json: async () => ({ data: { user: { login: 'octocat' } } }),
+			});
+
+			const request = { query: 'query { }', variables: {} };
+
+			const promise = executeGraphQLQueryWithRetry(request, 'ghp_token');
+
+			// Advance through retries
+			await vi.advanceTimersByTimeAsync(0); // Initial attempt fails
+			await vi.advanceTimersByTimeAsync(1000); // First retry fails after 1s
+			await vi.advanceTimersByTimeAsync(2000); // Second retry succeeds after 2s
+
+			const result = await promise;
+
+			expect(result.data).toBeDefined();
+			expect(mockFetch).toHaveBeenCalledTimes(3);
+
+			vi.useRealTimers();
 		});
 	});
 });
