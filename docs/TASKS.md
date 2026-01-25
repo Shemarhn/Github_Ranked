@@ -311,14 +311,14 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **ID**: P2-T4
 - **Description**: Implement functions to build GraphQL queries with variables
 - **Acceptance Criteria**:
-  - [ ] `buildUserStatsQuery()` function created
-  - [ ] Function injects variables correctly
-  - [ ] Function handles date formatting
-  - [ ] Unit tests written
+  - [x] `buildUserStatsQuery()` function created
+  - [x] Function injects variables correctly
+  - [x] Function handles date formatting
+  - [x] Unit tests written
 - **Estimated Time**: 1 hour
 - **Dependencies**: P2-T3
 - **Priority**: High
-- **Status**: 🔴 Not Started
+- **Status**: 🟢 Completed
 
 ### P2-T5: Implement GraphQL Request Function
 - **ID**: P2-T5
