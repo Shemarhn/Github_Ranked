@@ -3,8 +3,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { calculateWPI } from '@/lib/ranking/engine';
+import { calculateWPI, calculateZScore } from '@/lib/ranking/engine';
 import type { AggregatedStats } from '@/lib/github/types';
+import { MEAN_LOG_SCORE, STD_DEV } from '@/lib/ranking/constants';
 
 describe('Ranking Engine - calculateWPI', () => {
   it('should calculate WPI with all metrics', () => {
@@ -235,5 +236,107 @@ describe('Ranking Engine - calculateWPI', () => {
 
     expect(wpi1).toBe(wpi2);
     expect(wpi2).toBe(wpi3);
+  });
+});
+
+describe('Ranking Engine - calculateZScore', () => {
+  it('should calculate Z-score from WPI', () => {
+    const wpi = 1000;
+    const zScore = calculateZScore(wpi);
+
+    // log(1000) ≈ 6.907755
+    // (6.907755 - 6.5) / 1.5 ≈ 0.272
+    expect(zScore).toBeCloseTo(0.272, 2);
+  });
+
+  it('should return 0 for WPI at global mean', () => {
+    // Find WPI that results in log score equal to MEAN_LOG_SCORE
+    const wpi = Math.exp(MEAN_LOG_SCORE); // e^6.5 ≈ 665.14
+    const zScore = calculateZScore(wpi);
+
+    // Z-score should be 0 when log(WPI) equals MEAN_LOG_SCORE
+    expect(zScore).toBeCloseTo(0, 10);
+  });
+
+  it('should return positive Z-score for high WPI', () => {
+    const wpi = 10000;
+    const zScore = calculateZScore(wpi);
+
+    // log(10000) ≈ 9.21034
+    // (9.21034 - 6.5) / 1.5 ≈ 1.807
+    expect(zScore).toBeCloseTo(1.807, 2);
+    expect(zScore).toBeGreaterThan(0);
+  });
+
+  it('should return negative Z-score for low WPI', () => {
+    const wpi = 100;
+    const zScore = calculateZScore(wpi);
+
+    // log(100) ≈ 4.605
+    // (4.605 - 6.5) / 1.5 ≈ -1.263
+    expect(zScore).toBeCloseTo(-1.263, 2);
+    expect(zScore).toBeLessThan(0);
+  });
+
+  it('should handle minimum WPI of 1', () => {
+    const wpi = 1;
+    const zScore = calculateZScore(wpi);
+
+    // log(1) = 0
+    // (0 - 6.5) / 1.5 ≈ -4.333
+    expect(zScore).toBeCloseTo(-4.333, 2);
+  });
+
+  it('should return higher Z-score for higher WPI', () => {
+    const wpi1 = 1000;
+    const wpi2 = 10000;
+
+    const zScore1 = calculateZScore(wpi1);
+    const zScore2 = calculateZScore(wpi2);
+
+    expect(zScore2).toBeGreaterThan(zScore1);
+  });
+
+  it('should apply log-normal transformation correctly', () => {
+    const wpi = 5000;
+    const zScore = calculateZScore(wpi);
+
+    // Manual calculation:
+    // log(5000) ≈ 8.517
+    // (8.517 - 6.5) / 1.5 ≈ 1.345
+    const expectedLogScore = Math.log(5000);
+    const expectedZScore = (expectedLogScore - MEAN_LOG_SCORE) / STD_DEV;
+
+    expect(zScore).toBeCloseTo(expectedZScore, 10);
+  });
+
+  it('should use correct constants', () => {
+    // Verify constants are being used
+    const wpi = Math.exp(MEAN_LOG_SCORE + STD_DEV); // One standard deviation above mean
+    const zScore = calculateZScore(wpi);
+
+    // Should result in Z-score of 1.0
+    expect(zScore).toBeCloseTo(1.0, 10);
+  });
+
+  it('should return consistent results for same input', () => {
+    const wpi = 2500;
+
+    const zScore1 = calculateZScore(wpi);
+    const zScore2 = calculateZScore(wpi);
+    const zScore3 = calculateZScore(wpi);
+
+    expect(zScore1).toBe(zScore2);
+    expect(zScore2).toBe(zScore3);
+  });
+
+  it('should handle very large WPI values', () => {
+    const wpi = 1000000;
+    const zScore = calculateZScore(wpi);
+
+    // log(1000000) ≈ 13.816
+    // (13.816 - 6.5) / 1.5 ≈ 4.877
+    expect(zScore).toBeCloseTo(4.877, 2);
+    expect(Number.isFinite(zScore)).toBe(true);
   });
 });

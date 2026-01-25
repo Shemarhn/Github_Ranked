@@ -4,7 +4,7 @@
  */
 
 import type { AggregatedStats } from '@/lib/github/types';
-import { METRIC_WEIGHTS, MAX_STARS_CAP } from './constants';
+import { METRIC_WEIGHTS, MAX_STARS_CAP, MEAN_LOG_SCORE, STD_DEV } from './constants';
 
 /**
  * Calculate Weighted Performance Index (WPI)
@@ -41,4 +41,31 @@ export function calculateWPI(stats: AggregatedStats): number {
 
   // Ensure minimum WPI of 1 to avoid log(0) in subsequent calculations
   return Math.max(wpi, 1);
+}
+
+/**
+ * Calculate Z-Score from Weighted Performance Index
+ *
+ * Applies log-normal transformation to WPI and calculates standard deviations
+ * from the global mean. This normalizes the exponential distribution of
+ * developer activity into a standard normal distribution.
+ *
+ * @param wpi - Weighted Performance Index
+ * @returns Z-score (standard deviations from mean)
+ *
+ * @example
+ * ```typescript
+ * const wpi = 5000;
+ * const zScore = calculateZScore(wpi);
+ * // log(5000) ≈ 8.517, (8.517 - 6.5) / 1.5 ≈ 1.34
+ * ```
+ */
+export function calculateZScore(wpi: number): number {
+  // Apply log transformation to normalize exponential distribution
+  const logScore = Math.log(wpi);
+
+  // Calculate standard deviations from global mean
+  const zScore = (logScore - MEAN_LOG_SCORE) / STD_DEV;
+
+  return zScore;
 }

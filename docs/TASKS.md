@@ -445,14 +445,14 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **ID**: P3-T2
 - **Description**: Create function to calculate Z-score from WPI
 - **Acceptance Criteria**:
-  - [ ] `calculateZScore()` function created
-  - [ ] Function applies log-normal transformation
-  - [ ] Function uses correct constants (MEAN_LOG_SCORE, STD_DEV)
-  - [ ] Unit tests with known WPI values
+  - [x] `calculateZScore()` function created
+  - [x] Function applies log-normal transformation
+  - [x] Function uses correct constants (MEAN_LOG_SCORE, STD_DEV)
+  - [x] Unit tests with known WPI values
 - **Estimated Time**: 1.5 hours
 - **Dependencies**: P3-T1
 - **Priority**: Critical
-- **Status**: � Not Started
+- **Status**: 🟢 Completed
 
 ### P3-T3: Implement Elo Calculator
 - **ID**: P3-T3
