@@ -151,15 +151,15 @@ export const TIER_COLORS: Record<
 } as const;
 
 // ============================================================================
-// League Points (LP)
+// Git Points (GP)
 // ============================================================================
 
 /**
- * Maximum LP value within a division
+ * Maximum GP value within a division
  */
-export const MAX_LP = 99;
+export const MAX_GP = 99;
 
 /**
- * Minimum LP value
+ * Minimum GP value
  */
-export const MIN_LP = 0;
+export const MIN_GP = 0;

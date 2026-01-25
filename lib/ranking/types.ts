@@ -83,8 +83,8 @@ export interface RankResult {
   /** Elo rating (0 - 3500+) */
   elo: number;
 
-  /** League Points within current division (0 - 99) */
-  lp: number;
+  /** Git Points within current division (0 - 99) */
+  gp: number;
 
   /** Percentile ranking (0 - 100) */
   percentile: number;
@@ -111,7 +111,7 @@ export interface TierInfo {
  */
 export interface RankProgress {
   currentElo: number;
-  currentLP: number;
+  currentGP: number;
   nextDivisionElo: number;
   nextTierElo: number;
   progressToNextDivision: number; // 0-100

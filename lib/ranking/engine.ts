@@ -4,7 +4,7 @@
  */
 
 import type { AggregatedStats } from '@/lib/github/types';
-import type { Tier, Division } from './types';
+import type { Tier, Division, RankResult } from './types';
 import {
   METRIC_WEIGHTS,
   MAX_STARS_CAP,
@@ -14,6 +14,8 @@ import {
   ELO_PER_SIGMA,
   TIER_THRESHOLDS,
   TIERS_WITH_DIVISIONS,
+  MAX_GP,
+  MIN_GP,
 } from './constants';
 
 /**
@@ -200,4 +202,199 @@ export function getDivision(elo: number, tier: Tier): Division | null {
 
   // Division I: highest quarter
   return 'I';
+}
+
+/**
+ * Calculate Git Points (GP) within current division
+ *
+ * GP represents progress within a division, ranging from 0-99.
+ * Returns 0 for tiers without divisions (Master, Grandmaster, Challenger).
+ *
+ * @param elo - Elo rating
+ * @param tier - Current tier
+ * @param division - Current division
+ * @returns Git Points (0-99) or 0 for Master+
+ *
+ * @example
+ * ```typescript
+ * const elo = 1350;
+ * const tier = getTier(elo); // 'Gold'
+ * const division = getDivision(elo, tier); // 'II'
+ * const gp = calculateGP(elo, tier, division); // 50 (halfway through Gold II)
+ * ```
+ */
+export function calculateGP(elo: number, tier: Tier, division: Division | null): number {
+  // Master, Grandmaster, and Challenger do not use GP
+  if (division === null || !TIERS_WITH_DIVISIONS.has(tier)) {
+    return 0;
+  }
+
+  const { min, max } = TIER_THRESHOLDS[tier];
+  const tierRange = max - min;
+  const divisionSize = tierRange / 4;
+
+  // Calculate the minimum Elo for the current division
+  const divisionIndex = { IV: 0, III: 1, II: 2, I: 3 }[division];
+  const divisionMinElo = min + divisionIndex * divisionSize;
+  const divisionMaxElo = min + (divisionIndex + 1) * divisionSize;
+
+  // Calculate position within the division
+  const positionInDivision = elo - divisionMinElo;
+
+  // At the very end of a division (just before the next division/tier starts),
+  // ensure we return MAX_GP (99)
+  if (elo >= divisionMaxElo - 1) {
+    return MAX_GP;
+  }
+
+  // Scale to 0-99 range
+  const gp = (positionInDivision / divisionSize) * (MAX_GP + 1);
+
+  // Clamp to valid range and floor to get integer
+  const clampedGP = Math.max(MIN_GP, Math.min(MAX_GP, Math.floor(gp)));
+
+  return clampedGP;
+}
+
+/**
+ * Error function (erf) approximation
+ *
+ * Uses Abramowitz and Stegun approximation formula for the error function.
+ * Accurate to ~1.5×10^-7 which is more than sufficient for percentile calculations.
+ *
+ * @param x - Input value
+ * @returns Error function value erf(x)
+ *
+ * @internal
+ */
+function erf(x: number): number {
+  // Constants for approximation
+  const a1 = 0.254829592;
+  const a2 = -0.284496736;
+  const a3 = 1.421413741;
+  const a4 = -1.453152027;
+  const a5 = 1.061405429;
+  const p = 0.3275911;
+
+  // Save the sign of x
+  const sign = x >= 0 ? 1 : -1;
+  const absX = Math.abs(x);
+
+  // A&S formula 7.1.26
+  const t = 1.0 / (1.0 + p * absX);
+  const y = 1.0 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
+
+  return sign * y;
+}
+
+/**
+ * Calculate percentile from Z-score
+ *
+ * Converts a Z-score to a percentile using the cumulative distribution function (CDF)
+ * of the standard normal distribution. Returns a value from 0 to 100 representing
+ * the percentage of developers with a lower score.
+ *
+ * @param zScore - Z-score (standard deviations from mean)
+ * @returns Percentile (0-100)
+ *
+ * @example
+ * ```typescript
+ * const zScore = 0; // Mean
+ * const percentile = calculatePercentile(zScore); // ~50 (median)
+ * ```
+ *
+ * @example
+ * ```typescript
+ * const zScore = 2; // 2 standard deviations above mean
+ * const percentile = calculatePercentile(zScore); // ~97.7 (top 2.3%)
+ * ```
+ */
+export function calculatePercentile(zScore: number): number {
+  // Standard normal CDF: Φ(z) = 0.5 * (1 + erf(z / √2))
+  const cdf = 0.5 * (1 + erf(zScore / Math.sqrt(2)));
+
+  // Convert to percentile (0-100)
+  const percentile = cdf * 100;
+
+  // Clamp to valid range (handle floating point edge cases)
+  const clampedPercentile = Math.max(0, Math.min(100, percentile));
+
+  // Round to 1 decimal place for cleaner UI display
+  return Math.round(clampedPercentile * 10) / 10;
+}
+
+/**
+ * Calculate complete rank for a user
+ *
+ * Main orchestration function that calculates all ranking metrics from
+ * aggregated GitHub statistics. This is the primary entry point for the
+ * ranking system.
+ *
+ * @param stats - Aggregated GitHub statistics
+ * @returns Complete rank result with all metrics
+ * @throws {Error} If stats are invalid or calculation fails
+ *
+ * @example
+ * ```typescript
+ * const stats = {
+ *   totalMergedPRs: 50,
+ *   totalCodeReviews: 30,
+ *   totalIssuesClosed: 20,
+ *   totalCommits: 100,
+ *   totalStars: 250,
+ *   totalFollowers: 10,
+ *   firstContributionYear: 2020,
+ *   lastContributionYear: 2024,
+ *   yearsActive: 5,
+ * };
+ *
+ * const rank = calculateRank(stats);
+ * // {
+ * //   tier: 'Gold',
+ * //   division: 'II',
+ * //   elo: 1350,
+ * //   gp: 50,
+ * //   percentile: 65.5,
+ * //   wpi: 5550,
+ * //   zScore: 0.375
+ * // }
+ * ```
+ */
+export function calculateRank(stats: AggregatedStats): RankResult {
+  // Validate input
+  if (!stats || typeof stats !== 'object') {
+    throw new Error('Invalid stats: must be an AggregatedStats object');
+  }
+
+  // Step 1: Calculate Weighted Performance Index (WPI)
+  const wpi = calculateWPI(stats);
+
+  // Step 2: Transform WPI to Z-score using log-normal distribution
+  const zScore = calculateZScore(wpi);
+
+  // Step 3: Convert Z-score to Elo rating
+  const elo = calculateElo(zScore);
+
+  // Step 4: Determine tier from Elo
+  const tier = getTier(elo);
+
+  // Step 5: Determine division within tier (if applicable)
+  const division = getDivision(elo, tier);
+
+  // Step 6: Calculate Git Points within division (if applicable)
+  const gp = calculateGP(elo, tier, division);
+
+  // Step 7: Calculate percentile ranking
+  const percentile = calculatePercentile(zScore);
+
+  // Return complete rank result
+  return {
+    tier,
+    division,
+    elo,
+    gp,
+    percentile,
+    wpi,
+    zScore,
+  };
 }
