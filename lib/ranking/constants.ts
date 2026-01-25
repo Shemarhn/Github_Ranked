@@ -160,6 +160,16 @@ export const TIER_COLORS: Record<
 export const MAX_GP = 99;
 
 /**
+ * Maximum LP value within a division (alias for GP)
+ */
+export const MAX_LP = MAX_GP;
+
+/**
  * Minimum GP value
  */
 export const MIN_GP = 0;
+
+/**
+ * Minimum LP value (alias for GP)
+ */
+export const MIN_LP = MIN_GP;
