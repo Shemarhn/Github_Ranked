@@ -431,15 +431,15 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **ID**: P3-T1
 - **Description**: Create function to calculate Weighted Performance Index
 - **Acceptance Criteria**:
-  - [ ] `calculateWPI()` function created
-  - [ ] Function applies correct weights (40, 30, 20, 10, 5)
-  - [ ] Stars capped at 500
-  - [ ] Minimum WPI of 1 (to avoid log(0))
-  - [ ] Unit tests with known inputs/outputs
+  - [x] `calculateWPI()` function created
+  - [x] Function applies correct weights (40, 30, 20, 10, 5)
+  - [x] Stars capped at 500
+  - [x] Minimum WPI of 1 (to avoid log(0))
+  - [x] Unit tests with known inputs/outputs
 - **Estimated Time**: 1.5 hours
 - **Dependencies**: P1-T8
 - **Priority**: Critical
-- **Status**: 🔴 Not Started
+- **Status**: 🟢 Completed
 
 ### P3-T2: Implement Z-Score Calculator
 - **ID**: P3-T2
@@ -452,7 +452,7 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **Estimated Time**: 1.5 hours
 - **Dependencies**: P3-T1
 - **Priority**: Critical
-- **Status**: 🔴 Not Started
+- **Status**: � Not Started
 
 ### P3-T3: Implement Elo Calculator
 - **ID**: P3-T3
@@ -466,7 +466,7 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **Estimated Time**: 1 hour
 - **Dependencies**: P3-T2
 - **Priority**: Critical
-- **Status**: 🔴 Not Started
+- **Status**: � Not Started
 
 ### P3-T4: Implement Tier Assignment
 - **ID**: P3-T4
@@ -480,7 +480,7 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **Estimated Time**: 2 hours
 - **Dependencies**: P3-T3, P1-T8
 - **Priority**: Critical
-- **Status**: 🔴 Not Started
+- **Status**: � Not Started
 
 ### P3-T5: Implement Division Calculator
 - **ID**: P3-T5
@@ -494,7 +494,7 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **Estimated Time**: 2 hours
 - **Dependencies**: P3-T4
 - **Priority**: Critical
-- **Status**: 🔴 Not Started
+- **Status**: � Not Started
 
 ### P3-T6: Implement LP Calculator
 - **ID**: P3-T6
@@ -508,7 +508,7 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **Estimated Time**: 1.5 hours
 - **Dependencies**: P3-T5
 - **Priority**: High
-- **Status**: 🔴 Not Started
+- **Status**: � Not Started
 
 ### P3-T7: Implement Percentile Calculator
 - **ID**: P3-T7
@@ -521,7 +521,7 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **Estimated Time**: 1.5 hours
 - **Dependencies**: P3-T2
 - **Priority**: Medium
-- **Status**: 🔴 Not Started
+- **Status**: � Not Started
 
 ### P3-T8: Create Main Ranking Function
 - **ID**: P3-T8
@@ -535,7 +535,7 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **Estimated Time**: 2 hours
 - **Dependencies**: P3-T1 through P3-T7
 - **Priority**: Critical
-- **Status**: 🔴 Not Started
+- **Status**: � Not Started
 
 **Phase 3 Total Estimated Time**: 14 hours
 
