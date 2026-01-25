@@ -1,0 +1,11 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Master tier icon">
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9b59b6"/>
+      <stop offset="100%" stop-color="#6a1b9a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="28" fill="url(#grad)" opacity="0.2"/>
+  <circle cx="32" cy="32" r="20" fill="url(#grad)"/>
+  <polygon points="32 12 36 26 50 26 38 34 42 48 32 40 22 48 26 34 14 26 28 26" fill="#d4a5ff" opacity="0.9"/>
+</svg>

@@ -1,0 +1,13 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diamond tier icon">
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b9f2ff"/>
+      <stop offset="100%" stop-color="#00d4ff"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="28" fill="url(#grad)" opacity="0.2"/>
+  <polygon points="12 24 24 10 40 10 52 24 40 54 24 54" fill="url(#grad)"/>
+  <polygon points="24 10 32 24 40 10" fill="#e0ffff"/>
+  <polygon points="12 24 32 24 24 54" fill="#e0ffff" opacity="0.8"/>
+  <polygon points="52 24 32 24 40 54" fill="#e0ffff" opacity="0.8"/>
+</svg>

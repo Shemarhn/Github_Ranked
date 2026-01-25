@@ -547,16 +547,16 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **ID**: P4-T1
 - **Description**: Design or source SVG icons for all 10 tiers
 - **Acceptance Criteria**:
-  - [ ] Icons created for all tiers (Iron → Challenger)
-  - [ ] Icons match design specifications from Architecture.md
-  - [ ] Icons stored in `public/icons/`
-  - [ ] Icons are SVG format
-  - [ ] Icons are optimized (< 5KB each)
-  - [ ] Icons render correctly in browser
+  - [x] Icons created for all tiers (Iron → Challenger)
+  - [x] Icons match design specifications from Architecture.md
+  - [x] Icons stored in `public/icons/`
+  - [x] Icons are SVG format
+  - [x] Icons are optimized (< 5KB each)
+  - [x] Icons render correctly in browser
 - **Estimated Time**: 4 hours (or source from game-icons.net)
 - **Dependencies**: P0-T3
 - **Priority**: Critical
-- **Status**: 🔴 Not Started
+- **Status**: 🟢 Completed
 
 ### P4-T2: Create RankIcon Component
 - **ID**: P4-T2
