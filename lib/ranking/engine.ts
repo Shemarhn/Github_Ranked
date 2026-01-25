@@ -4,7 +4,7 @@
  */
 
 import type { AggregatedStats } from '@/lib/github/types';
-import type { Tier } from './types';
+import type { Tier, Division } from './types';
 import {
   METRIC_WEIGHTS,
   MAX_STARS_CAP,
@@ -13,6 +13,7 @@ import {
   BASE_ELO,
   ELO_PER_SIGMA,
   TIER_THRESHOLDS,
+  TIERS_WITH_DIVISIONS,
 } from './constants';
 
 /**
@@ -149,4 +150,54 @@ export function getTier(elo: number): Tier {
 
   // Fallback to Iron for any Elo below 0 (shouldn't happen due to clamping)
   return 'Iron';
+}
+
+/**
+ * Get division within a tier from Elo rating
+ *
+ * Divides a tier's Elo range into 4 divisions (IV, III, II, I).
+ * Division I is the highest, Division IV is the lowest.
+ * Master, Grandmaster, and Challenger tiers do not use divisions.
+ *
+ * @param elo - Elo rating
+ * @param tier - Current tier
+ * @returns Division (IV → I) or null for Master+
+ *
+ * @example
+ * ```typescript
+ * const elo = 1350;
+ * const tier = getTier(elo); // 'Gold'
+ * const division = getDivision(elo, tier); // 'II' (Gold II)
+ * ```
+ */
+export function getDivision(elo: number, tier: Tier): Division | null {
+  // Master, Grandmaster, and Challenger do not use divisions
+  if (!TIERS_WITH_DIVISIONS.has(tier)) {
+    return null;
+  }
+
+  const { min, max } = TIER_THRESHOLDS[tier];
+  const range = max - min;
+  const position = elo - min;
+
+  // Each division occupies 1/4 of the tier range
+  const divisionSize = range / 4;
+
+  // Division IV: lowest quarter
+  if (position < divisionSize) {
+    return 'IV';
+  }
+
+  // Division III: second quarter
+  if (position < divisionSize * 2) {
+    return 'III';
+  }
+
+  // Division II: third quarter
+  if (position < divisionSize * 3) {
+    return 'II';
+  }
+
+  // Division I: highest quarter
+  return 'I';
 }
