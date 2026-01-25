@@ -34,8 +34,8 @@ import {
   TIER_THRESHOLDS,
   TIERS_WITH_DIVISIONS,
   TIER_COLORS,
-  MAX_LP,
-  MIN_LP,
+  MAX_GP,
+  MIN_GP,
 } from '@/lib/ranking/constants';
 
 describe('Phase 1: Core Infrastructure', () => {
@@ -139,7 +139,7 @@ describe('Phase 1: Core Infrastructure', () => {
         tier: 'Gold',
         division: 'II',
         elo: 1350,
-        lp: 45,
+        gp: 45,
         percentile: 55.5,
         wpi: 5000,
         zScore: 0.5,
@@ -155,7 +155,7 @@ describe('Phase 1: Core Infrastructure', () => {
         tier: 'Master',
         division: null,
         elo: 2500,
-        lp: 75,
+        gp: 75,
         percentile: 99.5,
         wpi: 50000,
         zScore: 3.0,
@@ -309,9 +309,9 @@ describe('Phase 1: Core Infrastructure', () => {
       expect(TIERS_WITH_DIVISIONS.has('Challenger')).toBe(false);
     });
 
-    it('should have LP constants', () => {
-      expect(MAX_LP).toBe(99);
-      expect(MIN_LP).toBe(0);
+    it('should have GP constants', () => {
+      expect(MAX_GP).toBe(99);
+      expect(MIN_GP).toBe(0);
     });
   });
 
