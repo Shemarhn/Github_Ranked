@@ -367,15 +367,15 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **ID**: P2-T8
 - **Description**: Create function to fetch list of years user has contributions
 - **Acceptance Criteria**:
-  - [ ] `fetchContributionYears()` function created
-  - [ ] Function uses GraphQL API
-  - [ ] Function returns array of years
-  - [ ] Error handling implemented
-  - [ ] Unit tests written
+  - [x] `fetchContributionYears()` function created
+  - [x] Function uses GraphQL API
+  - [x] Function returns array of years
+  - [x] Error handling implemented
+  - [x] Unit tests written
 - **Estimated Time**: 1.5 hours
 - **Dependencies**: P2-T5
 - **Priority**: Critical
-- **Status**: 🔴 Not Started
+- **Status**: 🟢 Completed
 
 ### P2-T9: Implement Yearly Stats Fetcher
 - **ID**: P2-T9
