@@ -154,4 +154,146 @@ describe('GitHub aggregator', () => {
     expect(result.stats).toHaveLength(2);
     vi.useRealTimers();
   });
+
+  it('aggregates all-time stats across years', async () => {
+    const currentYear = new Date().getUTCFullYear();
+
+    vi.mocked(executeGraphQLQueryWithRetry).mockImplementation(async (request) => {
+      if (request.query.includes('ContributionYears')) {
+        return {
+          data: {
+            user: {
+              contributionsCollection: {
+                contributionYears: [2023, 2024],
+              },
+            },
+          },
+        };
+      }
+
+      const variables = request.variables as { from?: string };
+      const from = variables.from ?? '';
+
+      if (from.startsWith(String(currentYear))) {
+        return {
+          data: {
+            user: {
+              contributionsCollection: {
+                totalCommitContributions: 0,
+                totalPullRequestContributions: 0,
+                totalPullRequestReviewContributions: 0,
+                totalIssueContributions: 0,
+                restrictedContributionsCount: 0,
+              },
+              followers: {
+                totalCount: 9,
+              },
+              repositories: {
+                nodes: [
+                  { stargazers: { totalCount: 5 } },
+                  { stargazers: { totalCount: 10 } },
+                ],
+              },
+            },
+          },
+        };
+      }
+
+      if (from.startsWith('2023')) {
+        return {
+          data: {
+            user: {
+              contributionsCollection: {
+                totalCommitContributions: 10,
+                totalPullRequestContributions: 2,
+                totalPullRequestReviewContributions: 1,
+                totalIssueContributions: 1,
+                restrictedContributionsCount: 0,
+              },
+              followers: { totalCount: 9 },
+              repositories: { nodes: [] },
+            },
+          },
+        };
+      }
+
+      return {
+        data: {
+          user: {
+            contributionsCollection: {
+              totalCommitContributions: 20,
+              totalPullRequestContributions: 4,
+              totalPullRequestReviewContributions: 2,
+              totalIssueContributions: 3,
+              restrictedContributionsCount: 1,
+            },
+            followers: { totalCount: 9 },
+            repositories: { nodes: [] },
+          },
+        },
+      };
+    });
+
+    const result = await aggregator.aggregateAllTimeStats('octocat', 'ghp_test');
+
+    expect(result).toEqual({
+      totalCommits: 30,
+      totalMergedPRs: 6,
+      totalCodeReviews: 3,
+      totalIssuesClosed: 4,
+      totalStars: 15,
+      totalFollowers: 9,
+      firstContributionYear: 2023,
+      lastContributionYear: 2024,
+      yearsActive: 2,
+    });
+  });
+
+  it('returns zero totals when no contribution years exist', async () => {
+    const currentYear = new Date().getUTCFullYear();
+
+    vi.mocked(executeGraphQLQueryWithRetry).mockImplementation(async (request) => {
+      if (request.query.includes('ContributionYears')) {
+        return {
+          data: {
+            user: {
+              contributionsCollection: {
+                contributionYears: [],
+              },
+            },
+          },
+        };
+      }
+
+      return {
+        data: {
+          user: {
+            contributionsCollection: {
+              totalCommitContributions: 0,
+              totalPullRequestContributions: 0,
+              totalPullRequestReviewContributions: 0,
+              totalIssueContributions: 0,
+              restrictedContributionsCount: 0,
+            },
+            followers: { totalCount: 0 },
+            repositories: { nodes: [] },
+          },
+        },
+      };
+    });
+
+    const result = await aggregator.aggregateAllTimeStats('new-user', 'ghp_test');
+
+    expect(result).toEqual({
+      totalCommits: 0,
+      totalMergedPRs: 0,
+      totalCodeReviews: 0,
+      totalIssuesClosed: 0,
+      totalStars: 0,
+      totalFollowers: 0,
+      firstContributionYear: currentYear,
+      lastContributionYear: currentYear,
+      yearsActive: 0,
+    });
+  });
 });

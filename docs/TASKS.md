@@ -409,17 +409,17 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **ID**: P2-T11
 - **Description**: Aggregate stats across all years into all-time totals
 - **Acceptance Criteria**:
-  - [ ] `aggregateAllTimeStats()` function created
-  - [ ] Function fetches all contribution years
-  - [ ] Function fetches stats for all years (parallel)
-  - [ ] Function sums all metrics correctly
-  - [ ] Function returns `AggregatedStats` object
-  - [ ] Error handling comprehensive
-  - [ ] Integration tests written
+  - [x] `aggregateAllTimeStats()` function created
+  - [x] Function fetches all contribution years
+  - [x] Function fetches stats for all years (parallel)
+  - [x] Function sums all metrics correctly
+  - [x] Function returns `AggregatedStats` object
+  - [x] Error handling comprehensive
+  - [x] Integration tests written
 - **Estimated Time**: 2.5 hours
 - **Dependencies**: P2-T8, P2-T10
 - **Priority**: Critical
-- **Status**: 🔴 Not Started
+- **Status**: 🟢 Completed
 
 **Phase 2 Total Estimated Time**: 16 hours
 
