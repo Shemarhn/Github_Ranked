@@ -11,67 +11,6 @@ export interface RankIconProps {
   style?: React.CSSProperties;
 }
 
-/**
- * Renders an inline tier icon for Satori SVG rendering.
- * Uses colored shapes instead of external images for Edge Runtime compatibility.
- */
-export function RankIcon({ tier, size = DEFAULT_ICON_SIZE, style }: RankIconProps) {
-  const colors = TIER_COLORS[tier];
-  const primaryColor = colors.primary[0];
-  const accentColor = colors.accent;
-
-  // Create a stylized badge shape
-  return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        ...style,
-      }}
-    >
-      {/* Outer ring */}
-      <div
-        style={{
-          position: 'absolute',
-          width: size,
-          height: size,
-          borderRadius: '50%',
-          background: `linear-gradient(135deg, ${primaryColor}, ${colors.primary[1]})`,
-          boxShadow: `0 0 ${size / 8}px ${accentColor}40`,
-        }}
-      />
-      {/* Inner circle */}
-      <div
-        style={{
-          position: 'absolute',
-          width: size * 0.75,
-          height: size * 0.75,
-          borderRadius: '50%',
-          background: `linear-gradient(135deg, ${colors.primary[1]}, ${primaryColor})`,
-          border: `2px solid ${accentColor}`,
-        }}
-      />
-      {/* Tier initial */}
-      <span
-        style={{
-          position: 'relative',
-          fontSize: size * 0.35,
-          fontWeight: 700,
-          color: accentColor,
-          textShadow: `0 1px 2px rgba(0,0,0,0.5)`,
-          zIndex: 1,
-        }}
-      >
-        {getTierInitial(tier)}
-      </span>
-    </div>
-  );
-}
-
 function getTierInitial(tier: Tier): string {
   switch (tier) {
     case 'Iron':
@@ -93,8 +32,49 @@ function getTierInitial(tier: Tier): string {
     case 'Grandmaster':
       return 'GM';
     case 'Challenger':
-      return '👑';
+      return 'C';
     default:
       return '?';
   }
+}
+
+/**
+ * Renders an inline tier icon for Satori SVG rendering.
+ * Uses a simple colored circle with tier initial for Edge Runtime compatibility.
+ */
+export function RankIcon({
+  tier,
+  size = DEFAULT_ICON_SIZE,
+  style,
+}: RankIconProps) {
+  const colors = TIER_COLORS[tier];
+  const primaryColor = colors.primary[0];
+  const accentColor = colors.accent;
+
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        background: primaryColor,
+        border: `3px solid ${accentColor}`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+        ...style,
+      }}
+    >
+      <span
+        style={{
+          fontSize: size * 0.4,
+          fontWeight: 700,
+          color: accentColor,
+        }}
+      >
+        {getTierInitial(tier)}
+      </span>
+    </div>
+  );
 }
