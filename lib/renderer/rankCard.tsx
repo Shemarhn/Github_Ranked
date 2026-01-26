@@ -64,7 +64,9 @@ export function RankCard({
         >
           {tierLabel}
         </div>
-        <div style={{ fontSize: 16, fontWeight: 600 }}>{eloLabel} SR</div>
+        <div style={{ fontSize: 16, fontWeight: 600, display: 'flex' }}>
+          {`${eloLabel} SR`}
+        </div>
         <ProgressBar tier={rank.tier} gp={rank.gp} width={200} />
         <div style={{ fontSize: 12, color: themeConfig.text.muted }}>
           {username}
