@@ -31,7 +31,12 @@ export function RadarChart({
   const colors = TIER_COLORS[tier];
 
   // Calculate a simple "score" visualization
-  const total = metrics.prs + metrics.reviews + metrics.issues + metrics.commits + metrics.stars;
+  const total =
+    metrics.prs +
+    metrics.reviews +
+    metrics.issues +
+    metrics.commits +
+    metrics.stars;
   const maxExpected = 1000; // Rough max for visualization
   const fillPercent = Math.min(100, (total / maxExpected) * 100);
 
