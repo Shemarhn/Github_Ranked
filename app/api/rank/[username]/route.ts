@@ -48,7 +48,6 @@ export async function GET(
   const requestId = crypto.randomUUID();
   const url = new URL(request.url);
   const { searchParams } = url;
-  const debug = searchParams.get('debug') === 'true';
 
   try {
     const { username } = await params;
@@ -184,31 +183,8 @@ export async function GET(
       });
     }
 
-    // Handle unexpected errors
-    console.error('[API] Unexpected error:', error);
-    if (debug) {
-      const debugDetails =
-        error instanceof Error
-          ? { name: error.name, message: error.message, stack: error.stack }
-          : { message: String(error) };
-
-      return NextResponse.json(
-        {
-          error: 'InternalError',
-          code: 500,
-          message: 'Internal server error',
-          requestId,
-          debug: debugDetails,
-        },
-        {
-          status: 500,
-          headers: {
-            ...getCacheHeaders(false, CACHE_TTL.ERROR),
-            'X-Request-Id': requestId,
-          },
-        }
-      );
-    }
+    // Log and return generic error
+    console.error('[API] Error:', error);
     const { status, body } = formatErrorResponse(error, requestId);
     return NextResponse.json(body, {
       status,
