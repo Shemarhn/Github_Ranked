@@ -54,9 +54,9 @@ async function loadFonts() {
   ]);
 
   return [
-    { name: FONT_FAMILY, data: regular, weight: 400, style: 'normal' },
-    { name: FONT_FAMILY, data: semiBold, weight: 600, style: 'normal' },
-    { name: FONT_FAMILY, data: bold, weight: 700, style: 'normal' },
+    { name: FONT_FAMILY, data: regular, weight: 400 as const, style: 'normal' as const },
+    { name: FONT_FAMILY, data: semiBold, weight: 600 as const, style: 'normal' as const },
+    { name: FONT_FAMILY, data: bold, weight: 700 as const, style: 'normal' as const },
   ];
 }
 

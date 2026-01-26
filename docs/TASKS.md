@@ -574,11 +574,11 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 
 ### P4-T3: Create ProgressBar Component
 - **ID**: P4-T3
-- **Description**: Create React component for LP progress bar
+- **Description**: Create React component for GP progress bar
 - **Acceptance Criteria**:
   - [x] `ProgressBar` component created
-  - [x] Component displays LP progress (0-100)
-  - [x] Component shows LP text ("45/100 LP")
+  - [x] Component displays GP progress (0-100)
+  - [x] Component shows GP text ("45/100 GP")
   - [x] Visual styling matches tier colors
   - [x] Component exported from `lib/renderer/components/ProgressBar.tsx`
 - **Estimated Time**: 1.5 hours

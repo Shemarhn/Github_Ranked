@@ -12,7 +12,15 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    'coverage/**',
   ]),
+  {
+    files: ['lib/renderer/**/*.tsx'],
+    rules: {
+      // Satori requires native img element, not Next.js Image
+      '@next/next/no-img-element': 'off',
+    },
+  },
 ]);
 
 export default eslintConfig;

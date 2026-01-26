@@ -5,8 +5,8 @@ import { TIER_COLORS } from '../../ranking/constants';
 
 export interface ProgressBarProps {
   tier: Tier;
-  lp: number;
-  maxLp?: number;
+  gp: number;
+  maxGp?: number;
   width?: number;
   height?: number;
   showText?: boolean;
@@ -16,22 +16,22 @@ export interface ProgressBarProps {
 
 const DEFAULT_WIDTH = 200;
 const DEFAULT_HEIGHT = 8;
-const DEFAULT_MAX_LP = 100;
+const DEFAULT_MAX_GP = 100;
 
 /**
- * Renders a LP progress bar with tier-specific styling.
+ * Renders a GP progress bar with tier-specific styling.
  *
  * @param tier - Rank tier for color styling.
- * @param lp - Current LP (0-99).
- * @param maxLp - Display max LP (default 100).
+ * @param gp - Current GP (0-99).
+ * @param maxGp - Display max GP (default 100).
  * @param width - Bar width in pixels.
  * @param height - Bar height in pixels.
- * @param showText - Whether to render LP text.
+ * @param showText - Whether to render GP text.
  */
 export function ProgressBar({
   tier,
-  lp,
-  maxLp = DEFAULT_MAX_LP,
+  gp,
+  maxGp = DEFAULT_MAX_GP,
   width = DEFAULT_WIDTH,
   height = DEFAULT_HEIGHT,
   showText = true,
@@ -39,8 +39,8 @@ export function ProgressBar({
   style,
 }: ProgressBarProps) {
   const colors = TIER_COLORS[tier];
-  const clampedLp = Math.max(0, Math.min(lp, maxLp));
-  const progressPercent = Math.max(0, Math.min(100, (clampedLp / maxLp) * 100));
+  const clampedGp = Math.max(0, Math.min(gp, maxGp));
+  const progressPercent = Math.max(0, Math.min(100, (clampedGp / maxGp) * 100));
 
   return (
     <div
@@ -79,7 +79,7 @@ export function ProgressBar({
             letterSpacing: '0.04em',
           }}
         >
-          {Math.round(clampedLp)}/{maxLp} LP
+          {Math.round(clampedGp)}/{maxGp} GP
         </span>
       ) : null}
     </div>
