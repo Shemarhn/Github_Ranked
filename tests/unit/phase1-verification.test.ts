@@ -16,12 +16,7 @@ import { isAggregatedStats } from '@/lib/github/types';
 
 // Import Ranking types and type guards
 import type { Tier, Division, RankResult } from '@/lib/ranking/types';
-import {
-  TIERS,
-  DIVISIONS,
-  isTier,
-  isDivision,
-} from '@/lib/ranking/types';
+import { TIERS, DIVISIONS, isTier, isDivision } from '@/lib/ranking/types';
 
 // Import Ranking constants
 import {

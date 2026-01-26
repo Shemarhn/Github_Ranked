@@ -73,7 +73,13 @@ export function RadarChart({
       role="img"
       aria-label="Metric radar chart"
     >
-      <circle cx={center} cy={center} r={radius} fill="none" stroke="rgba(255, 255, 255, 0.12)" />
+      <circle
+        cx={center}
+        cy={center}
+        r={radius}
+        fill="none"
+        stroke="rgba(255, 255, 255, 0.12)"
+      />
       {axisPoints.map((point, index) => (
         <line
           key={`axis-${index}`}

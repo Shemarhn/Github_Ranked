@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validateUsername, validateTheme, validateSeason } from '@/lib/utils/validation';
-import { formatErrorResponse, UserNotFoundError, ValidationError, RateLimitError } from '@/lib/utils/errors';
-import { aggregateAllTimeStats, fetchYearlyStats } from '@/lib/github/aggregator';
+import {
+  validateUsername,
+  validateTheme,
+  validateSeason,
+} from '@/lib/utils/validation';
+import {
+  formatErrorResponse,
+  UserNotFoundError,
+  ValidationError,
+  RateLimitError,
+} from '@/lib/utils/errors';
+import {
+  aggregateAllTimeStats,
+  fetchYearlyStats,
+} from '@/lib/github/aggregator';
 import { calculateRank } from '@/lib/ranking/engine';
 import { renderRankCard } from '@/lib/renderer/render';
 import {
@@ -182,4 +194,3 @@ export async function GET(
     });
   }
 }
-

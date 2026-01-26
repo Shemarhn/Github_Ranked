@@ -223,7 +223,11 @@ export function getDivision(elo: number, tier: Tier): Division | null {
  * const gp = calculateGP(elo, tier, division); // 50 (halfway through Gold II)
  * ```
  */
-export function calculateGP(elo: number, tier: Tier, division: Division | null): number {
+export function calculateGP(
+  elo: number,
+  tier: Tier,
+  division: Division | null
+): number {
   // Master, Grandmaster, and Challenger do not use GP
   if (division === null || !TIERS_WITH_DIVISIONS.has(tier)) {
     return 0;
@@ -282,7 +286,9 @@ function erf(x: number): number {
 
   // A&S formula 7.1.26
   const t = 1.0 / (1.0 + p * absX);
-  const y = 1.0 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
+  const y =
+    1.0 -
+    ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
 
   return sign * y;
 }

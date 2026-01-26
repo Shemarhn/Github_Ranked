@@ -5,7 +5,11 @@
 
 import { GitHubAPIError, UserNotFoundError } from '@/lib/utils/errors';
 import { TokenPoolManager } from './tokenPool';
-import { buildContributionYearsQuery, buildUserStatsQuery, getYearDates } from './queries';
+import {
+  buildContributionYearsQuery,
+  buildUserStatsQuery,
+  getYearDates,
+} from './queries';
 import {
   executeGraphQLQueryWithRetry,
   parseRateLimitFromResponse,
@@ -89,7 +93,9 @@ const applyRateLimitUpdate = (
   pool.recordUsage(token, Math.max(rateLimit.cost, 1));
 };
 
-const resolveToken = (token?: string): { token: string; useTokenPool: boolean } => {
+const resolveToken = (
+  token?: string
+): { token: string; useTokenPool: boolean } => {
   if (token) {
     return { token, useTokenPool: false };
   }
@@ -112,10 +118,11 @@ export async function fetchContributionYears(
 ): Promise<number[]> {
   const resolved = resolveToken(token);
   const request = buildContributionYearsQuery(username);
-  const response = await executeGraphQLQueryWithRetry<ContributionYearsResponse>(
-    request,
-    resolved.token
-  );
+  const response =
+    await executeGraphQLQueryWithRetry<ContributionYearsResponse>(
+      request,
+      resolved.token
+    );
 
   applyRateLimitUpdate(response, resolved.token, resolved.useTokenPool);
 
@@ -239,7 +246,8 @@ export async function fetchYearlyStatsForYears(
     .map((result) => result.year);
 
   const userNotFound = results.find(
-    (result) => result.status === 'rejected' && result.reason instanceof UserNotFoundError
+    (result) =>
+      result.status === 'rejected' && result.reason instanceof UserNotFoundError
   );
 
   if (userNotFound) {
@@ -251,9 +259,12 @@ export async function fetchYearlyStatsForYears(
     .map((result) => result.value);
 
   if (stats.length === 0) {
-    throw new GitHubAPIError('Failed to fetch yearly stats for all requested years', {
-      years,
-    });
+    throw new GitHubAPIError(
+      'Failed to fetch yearly stats for all requested years',
+      {
+        years,
+      }
+    );
   }
 
   return { stats, failedYears };

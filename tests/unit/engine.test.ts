@@ -14,7 +14,12 @@ import {
   calculateRank,
 } from '@/lib/ranking/engine';
 import type { AggregatedStats } from '@/lib/github/types';
-import { MEAN_LOG_SCORE, STD_DEV, BASE_ELO, ELO_PER_SIGMA } from '@/lib/ranking/constants';
+import {
+  MEAN_LOG_SCORE,
+  STD_DEV,
+  BASE_ELO,
+  ELO_PER_SIGMA,
+} from '@/lib/ranking/constants';
 
 describe('Ranking Engine - calculateWPI', () => {
   it('should calculate WPI with all metrics', () => {
@@ -1154,7 +1159,9 @@ describe('Ranking Engine - calculateRank (Integration)', () => {
     const rank = calculateRank(stats);
 
     // High performer should be in upper tiers
-    expect(['Diamond', 'Master', 'Grandmaster', 'Challenger']).toContain(rank.tier);
+    expect(['Diamond', 'Master', 'Grandmaster', 'Challenger']).toContain(
+      rank.tier
+    );
     expect(rank.elo).toBeGreaterThan(1800);
     expect(rank.percentile).toBeGreaterThan(80);
   });
@@ -1197,7 +1204,11 @@ describe('Ranking Engine - calculateRank (Integration)', () => {
 
     const rank = calculateRank(stats);
 
-    if (rank.tier === 'Master' || rank.tier === 'Grandmaster' || rank.tier === 'Challenger') {
+    if (
+      rank.tier === 'Master' ||
+      rank.tier === 'Grandmaster' ||
+      rank.tier === 'Challenger'
+    ) {
       expect(rank.division).toBeNull();
       expect(rank.gp).toBe(0);
     }
@@ -1346,15 +1357,21 @@ describe('Ranking Engine - calculateRank (Integration)', () => {
   });
 
   it('should throw error for null stats', () => {
-    expect(() => calculateRank(null as unknown as AggregatedStats)).toThrow('Invalid stats');
+    expect(() => calculateRank(null as unknown as AggregatedStats)).toThrow(
+      'Invalid stats'
+    );
   });
 
   it('should throw error for undefined stats', () => {
-    expect(() => calculateRank(undefined as unknown as AggregatedStats)).toThrow('Invalid stats');
+    expect(() =>
+      calculateRank(undefined as unknown as AggregatedStats)
+    ).toThrow('Invalid stats');
   });
 
   it('should throw error for non-object stats', () => {
-    expect(() => calculateRank(42 as unknown as AggregatedStats)).toThrow('Invalid stats');
+    expect(() => calculateRank(42 as unknown as AggregatedStats)).toThrow(
+      'Invalid stats'
+    );
   });
 
   it('should return consistent results for same input', () => {

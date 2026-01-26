@@ -21,7 +21,12 @@ const CARD_HEIGHT = 120;
 /**
  * Main Rank Card component for SVG rendering.
  */
-export function RankCard({ username, rank, stats, theme = 'default' }: RankCardProps) {
+export function RankCard({
+  username,
+  rank,
+  stats,
+  theme = 'default',
+}: RankCardProps) {
   const themeConfig = getTheme(theme);
   const tierColors = TIER_COLORS[rank.tier];
   const tierLabel = rank.division ? `${rank.tier} ${rank.division}` : rank.tier;
@@ -46,7 +51,9 @@ export function RankCard({ username, rank, stats, theme = 'default' }: RankCardP
     >
       <RankIcon tier={rank.tier} size={64} />
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div
+        style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}
+      >
         <div
           style={{
             fontSize: 20,
@@ -57,11 +64,11 @@ export function RankCard({ username, rank, stats, theme = 'default' }: RankCardP
         >
           {tierLabel}
         </div>
-        <div style={{ fontSize: 16, fontWeight: 600 }}>
-          {eloLabel} SR
-        </div>
+        <div style={{ fontSize: 16, fontWeight: 600 }}>{eloLabel} SR</div>
         <ProgressBar tier={rank.tier} gp={rank.gp} width={200} />
-        <div style={{ fontSize: 12, color: themeConfig.text.muted }}>{username}</div>
+        <div style={{ fontSize: 12, color: themeConfig.text.muted }}>
+          {username}
+        </div>
       </div>
 
       <RadarChart

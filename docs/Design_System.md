@@ -4,6 +4,7 @@
 > **Version**: 1.0.0
 
 ## Table of Contents
+
 1. [Overview](#overview)
 2. [Design Philosophy](#design-philosophy)
 3. [Color System](#color-system)
@@ -23,6 +24,7 @@
 This document defines the visual design system for GitHub Ranked, ensuring consistent, high-quality visual output across all rank badges and themes.
 
 ### Design Goals
+
 - **Gaming Aesthetic**: Authentic competitive gaming look and feel
 - **Readability**: Clear hierarchy, readable at small sizes
 - **Scalability**: SVG-based, crisp at any resolution
@@ -36,6 +38,7 @@ This document defines the visual design system for GitHub Ranked, ensuring consi
 ### 2.1 Competitive Gaming Inspiration
 
 The visual design draws heavily from established competitive gaming aesthetics:
+
 - **League of Legends**: Tier emblems, metallic finishes, prestige feel
 - **Valorant**: Clean geometric shapes, bold colors, modern styling
 - **Overwatch**: Skill rating display, progression bars
@@ -50,6 +53,7 @@ The visual design draws heavily from established competitive gaming aesthetics:
 ### 2.3 Emotional Design
 
 Each tier should evoke specific emotions:
+
 - **Iron/Bronze**: Grounded, beginning journey
 - **Silver/Gold**: Progress, achievement
 - **Platinum/Emerald**: Excellence, pride
@@ -178,7 +182,13 @@ const TEXT_COLORS = {
 
 ```css
 /* Primary font stack (system fonts for compatibility with Satori) */
-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+font-family:
+  'Inter',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
 
 /* Monospace for numbers/Elo */
 font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
@@ -186,13 +196,13 @@ font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 
 ### 4.2 Type Scale
 
-| Element | Size | Weight | Line Height | Letter Spacing |
-|---------|------|--------|-------------|----------------|
-| Tier Name | 24px | 700 (Bold) | 1.2 | -0.02em |
-| Elo Rating | 20px | 600 (SemiBold) | 1.3 | 0 |
-| Division | 16px | 500 (Medium) | 1.4 | 0.02em |
-| LP Text | 12px | 400 (Regular) | 1.5 | 0.04em |
-| Username | 14px | 500 (Medium) | 1.4 | 0 |
+| Element    | Size | Weight         | Line Height | Letter Spacing |
+| ---------- | ---- | -------------- | ----------- | -------------- |
+| Tier Name  | 24px | 700 (Bold)     | 1.2         | -0.02em        |
+| Elo Rating | 20px | 600 (SemiBold) | 1.3         | 0              |
+| Division   | 16px | 500 (Medium)   | 1.4         | 0.02em         |
+| LP Text    | 12px | 400 (Regular)  | 1.5         | 0.04em         |
+| Username   | 14px | 500 (Medium)   | 1.4         | 0              |
 
 ### 4.3 Typography Hierarchy
 
@@ -217,60 +227,70 @@ DIAMOND II          ← Tier Name (24px, Bold, Tier Color)
 ### 5.2 Icon Design Guidelines
 
 **Iron**
+
 - Shape: Hexagonal gear/cog
 - Style: Flat, industrial
 - Effects: Subtle rust texture
 - Complexity: Simple, 6-8 points
 
 **Bronze**
+
 - Shape: Heavy shield with hammer
 - Style: Oxidized metal, polished highlights
 - Effects: Copper sheen
 - Complexity: Medium, shield + emblem
 
 **Silver**
+
 - Shape: Pointed shield with sword
 - Style: Polished steel, reflective
 - Effects: Chrome highlights
 - Complexity: Medium, clean lines
 
 **Gold**
+
 - Shape: Ornate crest with crown
 - Style: Luxurious, shiny
 - Effects: Golden glow, gradients
 - Complexity: High, decorative elements
 
 **Platinum**
+
 - Shape: Geometric crystal/gem
 - Style: Angular, futuristic
 - Effects: Teal metallic shine
 - Complexity: Medium-high, faceted
 
 **Emerald**
+
 - Shape: Natural gem shape
 - Style: Organic, polished
 - Effects: Green inner glow
 - Complexity: Medium, faceted gem
 
 **Diamond**
+
 - Shape: Multi-faceted diamond
 - Style: Brilliant, icy
 - Effects: Sparkle particles, rainbow refraction
 - Complexity: High, multiple facets
 
 **Master**
+
 - Shape: Mystical emblem
 - Style: Ethereal, void-like
 - Effects: Purple glow, energy wisps
 - Complexity: High, magical elements
 
 **Grandmaster**
+
 - Shape: Flaming emblem
 - Style: Intense, powerful
 - Effects: Fire particles, heat distortion
 - Complexity: Very high, animated flames
 
 **Challenger**
+
 - Shape: Ultimate emblem (combines all elements)
 - Style: Legendary, unmatched
 - Effects: Rainbow glow, particle effects, pulsing
@@ -295,10 +315,10 @@ public/icons/
 ### 5.4 Icon SVG Structure Template
 
 ```xml
-<svg 
-  width="64" 
-  height="64" 
-  viewBox="0 0 64 64" 
+<svg
+  width="64"
+  height="64"
+  viewBox="0 0 64 64"
   xmlns="http://www.w3.org/2000/svg"
 >
   <defs>
@@ -307,7 +327,7 @@ public/icons/
       <stop offset="0%" style="stop-color:#PRIMARY_COLOR_1"/>
       <stop offset="100%" style="stop-color:#PRIMARY_COLOR_2"/>
     </linearGradient>
-    
+
     <!-- Glow effect -->
     <filter id="glow">
       <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
@@ -317,13 +337,13 @@ public/icons/
       </feMerge>
     </filter>
   </defs>
-  
+
   <!-- Background glow (optional) -->
   <circle cx="32" cy="32" r="28" fill="url(#tierGradient)" opacity="0.2" filter="url(#glow)"/>
-  
+
   <!-- Main icon shape -->
   <path d="..." fill="url(#tierGradient)" filter="url(#glow)"/>
-  
+
   <!-- Highlights and details -->
   <path d="..." fill="#ACCENT_COLOR" opacity="0.6"/>
 </svg>
@@ -411,6 +431,7 @@ const LAYOUT = {
 ### 7.1 Progress Bar
 
 **Structure**:
+
 ```
 ┌─────────────────────────────────┐
 │██████████████████░░░░░░░░░░░░░░│
@@ -418,6 +439,7 @@ const LAYOUT = {
 ```
 
 **Specifications**:
+
 - Width: 200px
 - Height: 8px
 - Border Radius: 4px
@@ -426,21 +448,26 @@ const LAYOUT = {
 - Animation: None (static SVG)
 
 **Code**:
+
 ```tsx
 const ProgressBar = ({ lp, tier }: { lp: number; tier: Tier }) => (
-  <div style={{
-    width: 200,
-    height: 8,
-    borderRadius: 4,
-    background: 'rgba(255, 255, 255, 0.1)',
-    overflow: 'hidden',
-  }}>
-    <div style={{
-      width: `${lp}%`,
-      height: '100%',
-      background: `linear-gradient(90deg, ${TIER_COLORS[tier].primary[0]}, ${TIER_COLORS[tier].primary[1]})`,
+  <div
+    style={{
+      width: 200,
+      height: 8,
       borderRadius: 4,
-    }} />
+      background: 'rgba(255, 255, 255, 0.1)',
+      overflow: 'hidden',
+    }}
+  >
+    <div
+      style={{
+        width: `${lp}%`,
+        height: '100%',
+        background: `linear-gradient(90deg, ${TIER_COLORS[tier].primary[0]}, ${TIER_COLORS[tier].primary[1]})`,
+        borderRadius: 4,
+      }}
+    />
   </div>
 );
 ```
@@ -450,6 +477,7 @@ const ProgressBar = ({ lp, tier }: { lp: number; tier: Tier }) => (
 **Purpose**: Show metric breakdown (why user has this rank)
 
 **Axes** (5 points):
+
 1. PRs (top)
 2. Reviews (top-right)
 3. Issues (bottom-right)
@@ -457,25 +485,46 @@ const ProgressBar = ({ lp, tier }: { lp: number; tier: Tier }) => (
 5. Stars (top-left)
 
 **Specifications**:
+
 - Size: 48×48px
 - Stroke: 1px white
 - Fill: Tier color with 30% opacity
 - Points: Normalized 0-1 scale
 
 **Code**:
+
 ```tsx
-const RadarChart = ({ metrics, tier }: { metrics: NormalizedMetrics; tier: Tier }) => {
+const RadarChart = ({
+  metrics,
+  tier,
+}: {
+  metrics: NormalizedMetrics;
+  tier: Tier;
+}) => {
   const points = calculateRadarPoints(metrics, 24); // radius = 24
-  const pathData = `M ${points.map(p => `${p.x},${p.y}`).join(' L ')} Z`;
-  
+  const pathData = `M ${points.map((p) => `${p.x},${p.y}`).join(' L ')} Z`;
+
   return (
     <svg width="48" height="48" viewBox="0 0 48 48">
       {/* Background grid */}
-      <polygon points="24,4 44,19 39,39 9,39 4,19" fill="none" stroke="rgba(255,255,255,0.2)" />
-      <polygon points="24,12 36,22 33,34 15,34 12,22" fill="none" stroke="rgba(255,255,255,0.1)" />
-      
+      <polygon
+        points="24,4 44,19 39,39 9,39 4,19"
+        fill="none"
+        stroke="rgba(255,255,255,0.2)"
+      />
+      <polygon
+        points="24,12 36,22 33,34 15,34 12,22"
+        fill="none"
+        stroke="rgba(255,255,255,0.1)"
+      />
+
       {/* Data polygon */}
-      <path d={pathData} fill={`${TIER_COLORS[tier].primary[0]}50`} stroke={TIER_COLORS[tier].accent} strokeWidth="2" />
+      <path
+        d={pathData}
+        fill={`${TIER_COLORS[tier].primary[0]}50`}
+        stroke={TIER_COLORS[tier].accent}
+        strokeWidth="2"
+      />
     </svg>
   );
 };
@@ -502,52 +551,68 @@ interface RankCardProps {
   theme: Theme;
 }
 
-const RankCard = ({ username, tier, division, elo, lp, metrics, theme }: RankCardProps) => (
-  <div style={{
-    width: 400,
-    height: 120,
-    padding: 16,
-    borderRadius: 8,
-    background: BACKGROUND_COLORS[theme].primary,
-    border: `1px solid ${BACKGROUND_COLORS[theme].border}`,
-    display: 'flex',
-    alignItems: 'center',
-    fontFamily: 'Inter, sans-serif',
-  }}>
+const RankCard = ({
+  username,
+  tier,
+  division,
+  elo,
+  lp,
+  metrics,
+  theme,
+}: RankCardProps) => (
+  <div
+    style={{
+      width: 400,
+      height: 120,
+      padding: 16,
+      borderRadius: 8,
+      background: BACKGROUND_COLORS[theme].primary,
+      border: `1px solid ${BACKGROUND_COLORS[theme].border}`,
+      display: 'flex',
+      alignItems: 'center',
+      fontFamily: 'Inter, sans-serif',
+    }}
+  >
     {/* Tier Icon */}
     <TierIcon tier={tier} size={64} />
-    
+
     {/* Content */}
     <div style={{ marginLeft: 16, flex: 1 }}>
-      <div style={{
-        fontSize: 24,
-        fontWeight: 700,
-        color: TIER_COLORS[tier].primary[0],
-        textShadow: `0 0 10px ${TIER_COLORS[tier].glow}`,
-      }}>
+      <div
+        style={{
+          fontSize: 24,
+          fontWeight: 700,
+          color: TIER_COLORS[tier].primary[0],
+          textShadow: `0 0 10px ${TIER_COLORS[tier].glow}`,
+        }}
+      >
         {tier} {division}
       </div>
-      
-      <div style={{
-        fontSize: 20,
-        fontWeight: 600,
-        color: TEXT_COLORS.primary,
-        fontFamily: 'JetBrains Mono, monospace',
-      }}>
+
+      <div
+        style={{
+          fontSize: 20,
+          fontWeight: 600,
+          color: TEXT_COLORS.primary,
+          fontFamily: 'JetBrains Mono, monospace',
+        }}
+      >
         {elo.toLocaleString()} SR
       </div>
-      
+
       <ProgressBar lp={lp} tier={tier} />
-      
-      <div style={{
-        fontSize: 12,
-        color: TEXT_COLORS.muted,
-        marginTop: 4,
-      }}>
+
+      <div
+        style={{
+          fontSize: 12,
+          color: TEXT_COLORS.muted,
+          marginTop: 4,
+        }}
+      >
         {lp}/100 LP
       </div>
     </div>
-    
+
     {/* Radar Chart */}
     <RadarChart metrics={normalizeMetrics(metrics)} tier={tier} />
   </div>
@@ -559,24 +624,28 @@ const RankCard = ({ username, tier, division, elo, lp, metrics, theme }: RankCar
 ## 8. Theme Variants
 
 ### 8.1 Default Theme
+
 - Dark background (#0d1117)
 - Full color tier icons
 - White text with tier-colored accents
 - Glow effects enabled
 
 ### 8.2 Dark Theme
+
 - Pure black background (#000000)
 - High contrast colors
 - Stronger glow effects
 - Maximum visual impact
 
 ### 8.3 Light Theme
+
 - White background (#ffffff)
 - Adjusted tier colors for contrast
 - Subtle shadows instead of glows
 - Professional appearance
 
 ### 8.4 Minimal Theme
+
 - Transparent background
 - Border-only container
 - Reduced visual effects
@@ -628,6 +697,7 @@ const THEMES: Record<Theme, ThemeConfig> = {
 ### 9.1 SVG Animations (Static Badge)
 
 Since GitHub README images are static, animations are **not supported** in the base badge. However, the design should still feel "alive" through:
+
 - Dynamic gradients
 - Implied motion in shapes
 - Particle effects (static representation)
@@ -637,16 +707,19 @@ Since GitHub README images are static, animations are **not supported** in the b
 For future interactive versions (website, app):
 
 **Hover Effects**:
+
 - Icon scale: 1.0 → 1.1
 - Glow intensity: 1.0 → 1.5
 - Transition: 200ms ease-out
 
 **Promotion Animation**:
+
 - Duration: 1000ms
 - Effect: Old tier fades, new tier bursts in with particles
 - Sound: Optional tier-up sound
 
 **LP Change**:
+
 - Duration: 500ms
 - Effect: Progress bar fills/empties smoothly
 
@@ -656,11 +729,11 @@ For future interactive versions (website, app):
 
 ### 10.1 Required Assets
 
-| Asset | Format | Dimensions | Max Size |
-|-------|--------|------------|----------|
-| Tier Icons (10) | SVG | 64×64 | 20KB each |
-| Font: Inter | WOFF2 | - | 50KB |
-| Font: JetBrains Mono | WOFF2 | - | 30KB |
+| Asset                | Format | Dimensions | Max Size  |
+| -------------------- | ------ | ---------- | --------- |
+| Tier Icons (10)      | SVG    | 64×64      | 20KB each |
+| Font: Inter          | WOFF2  | -          | 50KB      |
+| Font: JetBrains Mono | WOFF2  | -          | 30KB      |
 
 ### 10.2 Asset Delivery
 
@@ -681,6 +754,7 @@ For future interactive versions (website, app):
 ### 11.1 Color Contrast
 
 All text must meet WCAG AA standards:
+
 - Normal text: 4.5:1 contrast ratio
 - Large text (24px+): 3:1 contrast ratio
 
@@ -720,6 +794,7 @@ SVG includes accessibility elements:
 ## 12. Implementation Checklist
 
 ### Phase 1: Core Visuals
+
 - [ ] Define all tier color palettes
 - [ ] Create tier icon SVGs (10 icons)
 - [ ] Implement RankCard component
@@ -727,12 +802,14 @@ SVG includes accessibility elements:
 - [ ] Test all tier/theme combinations
 
 ### Phase 2: Polish
+
 - [ ] Add glow effects
 - [ ] Implement RadarChart component
 - [ ] Fine-tune typography
 - [ ] Verify accessibility
 
 ### Phase 3: Optimization
+
 - [ ] Optimize SVG file sizes
 - [ ] Subset fonts
 - [ ] Test performance
@@ -745,17 +822,21 @@ SVG includes accessibility elements:
 For designers creating assets:
 
 ### Icon Artboard
+
 - Size: 64×64px
 - Export: SVG, optimized
 - Color Mode: sRGB
 
 ### Card Artboard
+
 - Size: 400×120px
 - Export: SVG for reference
 - Include all themes as variants
 
 ### Color Tokens
+
 Export color tokens in formats:
+
 - CSS Custom Properties
 - JSON (for TypeScript)
 - Figma Tokens plugin format

@@ -78,8 +78,8 @@ query ContributionYears($login: String!) {
  * GraphQL request object structure.
  */
 export interface GraphQLRequest {
-	query: string;
-	variables: Record<string, unknown>;
+  query: string;
+  variables: Record<string, unknown>;
 }
 
 /**
@@ -91,22 +91,22 @@ export interface GraphQLRequest {
  * @returns GraphQL request object with query and variables
  */
 export function buildUserStatsQuery(
-	username: string,
-	from: Date | string,
-	to: Date | string
+  username: string,
+  from: Date | string,
+  to: Date | string
 ): GraphQLRequest {
-	// Format dates to ISO 8601 format
-	const fromDate = typeof from === 'string' ? from : from.toISOString();
-	const toDate = typeof to === 'string' ? to : to.toISOString();
+  // Format dates to ISO 8601 format
+  const fromDate = typeof from === 'string' ? from : from.toISOString();
+  const toDate = typeof to === 'string' ? to : to.toISOString();
 
-	return {
-		query: USER_STATS_QUERY,
-		variables: {
-			login: username,
-			from: fromDate,
-			to: toDate,
-		},
-	};
+  return {
+    query: USER_STATS_QUERY,
+    variables: {
+      login: username,
+      from: fromDate,
+      to: toDate,
+    },
+  };
 }
 
 /**
@@ -116,12 +116,12 @@ export function buildUserStatsQuery(
  * @returns GraphQL request object with query and variables
  */
 export function buildContributionYearsQuery(username: string): GraphQLRequest {
-	return {
-		query: CONTRIBUTION_YEARS_QUERY,
-		variables: {
-			login: username,
-		},
-	};
+  return {
+    query: CONTRIBUTION_YEARS_QUERY,
+    variables: {
+      login: username,
+    },
+  };
 }
 
 /**
@@ -131,11 +131,11 @@ export function buildContributionYearsQuery(username: string): GraphQLRequest {
  * @returns Object with from and to Date objects
  */
 export function getYearDates(year: number): { from: Date; to: Date } {
-	// Start: January 1st, 00:00:00 UTC
-	const from = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0));
+  // Start: January 1st, 00:00:00 UTC
+  const from = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0));
 
-	// End: December 31st, 23:59:59.999 UTC
-	const to = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
+  // End: December 31st, 23:59:59.999 UTC
+  const to = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
 
-	return { from, to };
+  return { from, to };
 }

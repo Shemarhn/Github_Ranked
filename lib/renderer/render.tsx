@@ -54,9 +54,24 @@ async function loadFonts() {
   ]);
 
   return [
-    { name: FONT_FAMILY, data: regular, weight: 400 as const, style: 'normal' as const },
-    { name: FONT_FAMILY, data: semiBold, weight: 600 as const, style: 'normal' as const },
-    { name: FONT_FAMILY, data: bold, weight: 700 as const, style: 'normal' as const },
+    {
+      name: FONT_FAMILY,
+      data: regular,
+      weight: 400 as const,
+      style: 'normal' as const,
+    },
+    {
+      name: FONT_FAMILY,
+      data: semiBold,
+      weight: 600 as const,
+      style: 'normal' as const,
+    },
+    {
+      name: FONT_FAMILY,
+      data: bold,
+      weight: 700 as const,
+      style: 'normal' as const,
+    },
   ];
 }
 
@@ -71,9 +86,12 @@ export async function renderRankCard({
 }: RenderRankCardOptions): Promise<string> {
   const fonts = await loadFonts();
 
-  return satori(<RankCard username={username} rank={rank} stats={stats} theme={theme} />, {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    fonts,
-  });
+  return satori(
+    <RankCard username={username} rank={rank} stats={stats} theme={theme} />,
+    {
+      width: CARD_WIDTH,
+      height: CARD_HEIGHT,
+      fonts,
+    }
+  );
 }

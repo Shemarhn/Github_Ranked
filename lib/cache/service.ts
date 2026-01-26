@@ -16,11 +16,7 @@ import {
   type CacheGetOptions,
   type CacheSetOptions,
 } from '../utils/cache';
-import {
-  redisGet,
-  redisSet,
-  isRedisConfigured,
-} from './redis';
+import { redisGet, redisSet, isRedisConfigured } from './redis';
 
 /**
  * Cached rank result with metadata

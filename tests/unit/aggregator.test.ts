@@ -32,7 +32,10 @@ describe('GitHub aggregator', () => {
       },
     });
 
-    const result = await aggregator.fetchContributionYears('octocat', 'ghp_test');
+    const result = await aggregator.fetchContributionYears(
+      'octocat',
+      'ghp_test'
+    );
 
     expect(result).toEqual([2024, 2023, 2022]);
   });
@@ -64,7 +67,11 @@ describe('GitHub aggregator', () => {
       },
     });
 
-    const result = await aggregator.fetchYearlyStats('octocat', 2024, 'ghp_test');
+    const result = await aggregator.fetchYearlyStats(
+      'octocat',
+      2024,
+      'ghp_test'
+    );
 
     expect(result).toEqual({
       year: 2024,
@@ -77,28 +84,30 @@ describe('GitHub aggregator', () => {
   });
 
   it('fetches yearly stats in parallel with partial failures', async () => {
-    vi.mocked(executeGraphQLQueryWithRetry).mockImplementation(async (request) => {
-      const variables = request.variables as { from?: string };
-      const from = variables.from ?? '';
+    vi.mocked(executeGraphQLQueryWithRetry).mockImplementation(
+      async (request) => {
+        const variables = request.variables as { from?: string };
+        const from = variables.from ?? '';
 
-      if (from.startsWith('2023')) {
-        throw new Error('Network error');
-      }
+        if (from.startsWith('2023')) {
+          throw new Error('Network error');
+        }
 
-      return {
-        data: {
-          user: {
-            contributionsCollection: {
-              totalCommitContributions: 10,
-              totalPullRequestContributions: 2,
-              totalPullRequestReviewContributions: 1,
-              totalIssueContributions: 1,
-              restrictedContributionsCount: 0,
+        return {
+          data: {
+            user: {
+              contributionsCollection: {
+                totalCommitContributions: 10,
+                totalPullRequestContributions: 2,
+                totalPullRequestReviewContributions: 1,
+                totalIssueContributions: 1,
+                restrictedContributionsCount: 0,
+              },
             },
           },
-        },
-      };
-    });
+        };
+      }
+    );
 
     const result = await aggregator.fetchYearlyStatsForYears(
       'octocat',
@@ -158,57 +167,75 @@ describe('GitHub aggregator', () => {
   it('aggregates all-time stats across years', async () => {
     const currentYear = new Date().getUTCFullYear();
 
-    vi.mocked(executeGraphQLQueryWithRetry).mockImplementation(async (request) => {
-      if (request.query.includes('ContributionYears')) {
-        return {
-          data: {
-            user: {
-              contributionsCollection: {
-                contributionYears: [2023, 2024],
+    vi.mocked(executeGraphQLQueryWithRetry).mockImplementation(
+      async (request) => {
+        if (request.query.includes('ContributionYears')) {
+          return {
+            data: {
+              user: {
+                contributionsCollection: {
+                  contributionYears: [2023, 2024],
+                },
               },
             },
-          },
-        };
-      }
+          };
+        }
 
-      const variables = request.variables as { from?: string };
-      const from = variables.from ?? '';
+        const variables = request.variables as { from?: string };
+        const from = variables.from ?? '';
 
-      if (from.startsWith(String(currentYear))) {
-        return {
-          data: {
-            user: {
-              contributionsCollection: {
-                totalCommitContributions: 0,
-                totalPullRequestContributions: 0,
-                totalPullRequestReviewContributions: 0,
-                totalIssueContributions: 0,
-                restrictedContributionsCount: 0,
-              },
-              followers: {
-                totalCount: 9,
-              },
-              repositories: {
-                nodes: [
-                  { stargazers: { totalCount: 5 } },
-                  { stargazers: { totalCount: 10 } },
-                ],
+        if (from.startsWith(String(currentYear))) {
+          return {
+            data: {
+              user: {
+                contributionsCollection: {
+                  totalCommitContributions: 0,
+                  totalPullRequestContributions: 0,
+                  totalPullRequestReviewContributions: 0,
+                  totalIssueContributions: 0,
+                  restrictedContributionsCount: 0,
+                },
+                followers: {
+                  totalCount: 9,
+                },
+                repositories: {
+                  nodes: [
+                    { stargazers: { totalCount: 5 } },
+                    { stargazers: { totalCount: 10 } },
+                  ],
+                },
               },
             },
-          },
-        };
-      }
+          };
+        }
 
-      if (from.startsWith('2023')) {
+        if (from.startsWith('2023')) {
+          return {
+            data: {
+              user: {
+                contributionsCollection: {
+                  totalCommitContributions: 10,
+                  totalPullRequestContributions: 2,
+                  totalPullRequestReviewContributions: 1,
+                  totalIssueContributions: 1,
+                  restrictedContributionsCount: 0,
+                },
+                followers: { totalCount: 9 },
+                repositories: { nodes: [] },
+              },
+            },
+          };
+        }
+
         return {
           data: {
             user: {
               contributionsCollection: {
-                totalCommitContributions: 10,
-                totalPullRequestContributions: 2,
-                totalPullRequestReviewContributions: 1,
-                totalIssueContributions: 1,
-                restrictedContributionsCount: 0,
+                totalCommitContributions: 20,
+                totalPullRequestContributions: 4,
+                totalPullRequestReviewContributions: 2,
+                totalIssueContributions: 3,
+                restrictedContributionsCount: 1,
               },
               followers: { totalCount: 9 },
               repositories: { nodes: [] },
@@ -216,25 +243,12 @@ describe('GitHub aggregator', () => {
           },
         };
       }
+    );
 
-      return {
-        data: {
-          user: {
-            contributionsCollection: {
-              totalCommitContributions: 20,
-              totalPullRequestContributions: 4,
-              totalPullRequestReviewContributions: 2,
-              totalIssueContributions: 3,
-              restrictedContributionsCount: 1,
-            },
-            followers: { totalCount: 9 },
-            repositories: { nodes: [] },
-          },
-        },
-      };
-    });
-
-    const result = await aggregator.aggregateAllTimeStats('octocat', 'ghp_test');
+    const result = await aggregator.aggregateAllTimeStats(
+      'octocat',
+      'ghp_test'
+    );
 
     expect(result).toEqual({
       totalCommits: 30,
@@ -252,37 +266,42 @@ describe('GitHub aggregator', () => {
   it('returns zero totals when no contribution years exist', async () => {
     const currentYear = new Date().getUTCFullYear();
 
-    vi.mocked(executeGraphQLQueryWithRetry).mockImplementation(async (request) => {
-      if (request.query.includes('ContributionYears')) {
+    vi.mocked(executeGraphQLQueryWithRetry).mockImplementation(
+      async (request) => {
+        if (request.query.includes('ContributionYears')) {
+          return {
+            data: {
+              user: {
+                contributionsCollection: {
+                  contributionYears: [],
+                },
+              },
+            },
+          };
+        }
+
         return {
           data: {
             user: {
               contributionsCollection: {
-                contributionYears: [],
+                totalCommitContributions: 0,
+                totalPullRequestContributions: 0,
+                totalPullRequestReviewContributions: 0,
+                totalIssueContributions: 0,
+                restrictedContributionsCount: 0,
               },
+              followers: { totalCount: 0 },
+              repositories: { nodes: [] },
             },
           },
         };
       }
+    );
 
-      return {
-        data: {
-          user: {
-            contributionsCollection: {
-              totalCommitContributions: 0,
-              totalPullRequestContributions: 0,
-              totalPullRequestReviewContributions: 0,
-              totalIssueContributions: 0,
-              restrictedContributionsCount: 0,
-            },
-            followers: { totalCount: 0 },
-            repositories: { nodes: [] },
-          },
-        },
-      };
-    });
-
-    const result = await aggregator.aggregateAllTimeStats('new-user', 'ghp_test');
+    const result = await aggregator.aggregateAllTimeStats(
+      'new-user',
+      'ghp_test'
+    );
 
     expect(result).toEqual({
       totalCommits: 0,

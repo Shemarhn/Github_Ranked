@@ -146,7 +146,11 @@ describe('Redis Client', () => {
 
       const result = await redisSet('test-key', { foo: 'bar' }, 3600);
       expect(result).toBe(true);
-      expect(mockRedisInstance.set).toHaveBeenCalledWith('test-key', { foo: 'bar' }, { ex: 3600 });
+      expect(mockRedisInstance.set).toHaveBeenCalledWith(
+        'test-key',
+        { foo: 'bar' },
+        { ex: 3600 }
+      );
     });
 
     it('should return false on error', async () => {

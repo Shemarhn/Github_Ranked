@@ -4,6 +4,7 @@
 > **Version**: 1.0.0
 
 ## Table of Contents
+
 1. [Overview](#overview)
 2. [Pipeline Stages](#pipeline-stages)
 3. [GitHub Actions Workflows](#github-actions-workflows)
@@ -18,18 +19,20 @@
 ## 1. Overview
 
 ### 1.1 Pipeline Goals
+
 - **Automation**: Automate build, test, and deployment processes
 - **Quality**: Enforce code quality through automated checks
 - **Speed**: Fast feedback loops for developers
 - **Safety**: Prevent broken code from reaching production
 
 ### 1.2 Pipeline Triggers
-| Event | Action |
-|-------|--------|
-| Push to `main` | Deploy to production |
-| Push to `develop` | Deploy to staging |
-| Pull Request | Run tests, deploy preview |
-| Manual | Production rollback, manual deploy |
+
+| Event             | Action                             |
+| ----------------- | ---------------------------------- |
+| Push to `main`    | Deploy to production               |
+| Push to `develop` | Deploy to staging                  |
+| Pull Request      | Run tests, deploy preview          |
+| Manual            | Production rollback, manual deploy |
 
 ---
 
@@ -48,28 +51,33 @@
 ### 2.2 Stage Details
 
 **Stage 1: Lint & Type Check**
+
 - ESLint (code style)
 - Prettier (formatting check)
 - TypeScript (type checking)
 - Duration: ~2 minutes
 
 **Stage 2: Build**
+
 - Next.js build
 - Bundle analysis
 - Duration: ~1 minute
 
 **Stage 3: Test**
+
 - Unit tests (Vitest)
 - Integration tests
 - Coverage report
 - Duration: ~3 minutes
 
 **Stage 4: Preview Deploy**
+
 - Vercel preview deployment
 - E2E smoke tests
 - Duration: ~2 minutes
 
 **Stage 5: Production Deploy**
+
 - Vercel production deployment
 - Health check
 - Duration: ~1 minute
@@ -236,7 +244,7 @@ name: Dependency Updates
 
 on:
   schedule:
-    - cron: '0 0 * * 1'  # Weekly on Monday
+    - cron: '0 0 * * 1' # Weekly on Monday
   workflow_dispatch:
 
 jobs:
@@ -271,7 +279,7 @@ jobs:
           title: 'chore: Weekly dependency updates'
           body: |
             Automated dependency updates.
-            
+
             Please review the changes and ensure tests pass.
           branch: deps/weekly-update
           delete-branch: true
@@ -287,7 +295,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '0 0 * * *'  # Daily
+    - cron: '0 0 * * *' # Daily
   workflow_dispatch:
 
 jobs:
@@ -379,7 +387,10 @@ jobs:
       "source": "/api/rank/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "public, max-age=3600, s-maxage=86400" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        }
       ]
     }
   ],
@@ -392,15 +403,16 @@ jobs:
 
 ### 4.2 Deployment Environments
 
-| Environment | Branch | URL | Auto Deploy |
-|------------|--------|-----|-------------|
-| Production | `main` | `github-ranked.vercel.app` | Yes |
-| Staging | `develop` | `github-ranked-staging.vercel.app` | Yes |
-| Preview | PR branches | `github-ranked-*.vercel.app` | Yes |
+| Environment | Branch      | URL                                | Auto Deploy |
+| ----------- | ----------- | ---------------------------------- | ----------- |
+| Production  | `main`      | `github-ranked.vercel.app`         | Yes         |
+| Staging     | `develop`   | `github-ranked-staging.vercel.app` | Yes         |
+| Preview     | PR branches | `github-ranked-*.vercel.app`       | Yes         |
 
 ### 4.3 Vercel Project Settings
 
 **Build & Development Settings**:
+
 - Framework Preset: Next.js
 - Build Command: `npm run build`
 - Output Directory: `.next`
@@ -408,6 +420,7 @@ jobs:
 - Development Command: `npm run dev`
 
 **Environment Variables** (per environment):
+
 - `GITHUB_TOKEN_1` through `GITHUB_TOKEN_N`
 - `UPSTASH_REDIS_REST_URL`
 - `UPSTASH_REDIS_REST_TOKEN`
@@ -422,29 +435,30 @@ jobs:
 
 All PRs must pass these checks before merge:
 
-| Check | Requirement | Blocking |
-|-------|-------------|----------|
-| Lint | No errors | ✅ Yes |
-| Type Check | No errors | ✅ Yes |
-| Unit Tests | All passing | ✅ Yes |
-| Code Coverage | ≥ 80% | ✅ Yes |
-| Build | Successful | ✅ Yes |
+| Check          | Requirement      | Blocking   |
+| -------------- | ---------------- | ---------- |
+| Lint           | No errors        | ✅ Yes     |
+| Type Check     | No errors        | ✅ Yes     |
+| Unit Tests     | All passing      | ✅ Yes     |
+| Code Coverage  | ≥ 80%            | ✅ Yes     |
+| Build          | Successful       | ✅ Yes     |
 | Security Audit | No high/critical | ⚠️ Warning |
-| E2E Tests | All passing | ✅ Yes |
-| PR Review | 1 approval | ✅ Yes |
+| E2E Tests      | All passing      | ✅ Yes     |
+| PR Review      | 1 approval       | ✅ Yes     |
 
 ### 5.2 Branch Protection Rules
 
 **For `main` branch**:
+
 ```yaml
 protection:
   required_status_checks:
     strict: true
     contexts:
-      - "Lint & Type Check"
-      - "Build"
-      - "Test"
-      - "Vercel"
+      - 'Lint & Type Check'
+      - 'Build'
+      - 'Test'
+      - 'Vercel'
   required_pull_request_reviews:
     required_approving_review_count: 1
     dismiss_stale_reviews: true
@@ -453,13 +467,14 @@ protection:
 ```
 
 **For `develop` branch**:
+
 ```yaml
 protection:
   required_status_checks:
     strict: false
     contexts:
-      - "Lint & Type Check"
-      - "Test"
+      - 'Lint & Type Check'
+      - 'Test'
   required_pull_request_reviews:
     required_approving_review_count: 1
   enforce_admins: false
@@ -517,14 +532,14 @@ feature ────────────────────────
 
 ### 6.2 Branch Naming Convention
 
-| Type | Pattern | Example |
-|------|---------|---------|
-| Feature | `feature/description` | `feature/add-dark-theme` |
-| Bug Fix | `fix/description` | `fix/rate-limit-header` |
-| Hotfix | `hotfix/description` | `hotfix/token-exhaustion` |
-| Documentation | `docs/description` | `docs/update-readme` |
-| Refactor | `refactor/description` | `refactor/ranking-engine` |
-| Dependencies | `deps/description` | `deps/weekly-update` |
+| Type          | Pattern                | Example                   |
+| ------------- | ---------------------- | ------------------------- |
+| Feature       | `feature/description`  | `feature/add-dark-theme`  |
+| Bug Fix       | `fix/description`      | `fix/rate-limit-header`   |
+| Hotfix        | `hotfix/description`   | `hotfix/token-exhaustion` |
+| Documentation | `docs/description`     | `docs/update-readme`      |
+| Refactor      | `refactor/description` | `refactor/ranking-engine` |
+| Dependencies  | `deps/description`     | `deps/weekly-update`      |
 
 ### 6.3 Commit Message Convention
 
@@ -539,6 +554,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 
 **Types**:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation
@@ -548,6 +564,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 - `chore`: Maintenance
 
 **Examples**:
+
 ```
 feat(ranking): add seasonal ranking support
 
@@ -567,13 +584,13 @@ Closes #123
 
 Required secrets in GitHub repository:
 
-| Secret | Description | Used In |
-|--------|-------------|---------|
-| `GITHUB_TOKEN_TEST` | GitHub PAT for CI tests | CI workflows |
-| `UPSTASH_TEST_URL` | Test Redis URL | CI workflows |
-| `UPSTASH_TEST_TOKEN` | Test Redis token | CI workflows |
-| `CODECOV_TOKEN` | Codecov upload token | Coverage report |
-| `SNYK_TOKEN` | Snyk security scan | Security audit |
+| Secret               | Description             | Used In         |
+| -------------------- | ----------------------- | --------------- |
+| `GITHUB_TOKEN_TEST`  | GitHub PAT for CI tests | CI workflows    |
+| `UPSTASH_TEST_URL`   | Test Redis URL          | CI workflows    |
+| `UPSTASH_TEST_TOKEN` | Test Redis token        | CI workflows    |
+| `CODECOV_TOKEN`      | Codecov upload token    | Coverage report |
+| `SNYK_TOKEN`         | Snyk security scan      | Security audit  |
 
 ### 7.2 Vercel Secrets
 
@@ -613,10 +630,12 @@ nano .env.local
 Configure in Vercel → Project → Settings → Integrations:
 
 **Slack Integration**:
+
 - Channel: `#github-ranked-deploys`
 - Events: Deployment success, failure, canceled
 
 **GitHub Deployment Status**:
+
 - Automatic via Vercel GitHub integration
 
 ### 8.2 CI Failure Alerts
@@ -624,21 +643,25 @@ Configure in Vercel → Project → Settings → Integrations:
 Configure in GitHub → Repository → Settings → Notifications:
 
 **Email Notifications**:
+
 - On: Failed workflow runs
 - To: Team email list
 
 **Slack Notifications** (via GitHub Slack App):
+
 - Channel: `#github-ranked-ci`
 - Events: Workflow failures
 
 ### 8.3 Health Monitoring
 
 **Vercel Analytics**:
+
 - Built-in performance monitoring
 - Real User Monitoring (RUM)
 - Web Vitals tracking
 
 **Uptime Monitoring** (recommended: UptimeRobot or Better Uptime):
+
 - Endpoint: `https://github-ranked.vercel.app/api/health`
 - Check interval: 5 minutes
 - Alert on: 2 consecutive failures
@@ -646,6 +669,7 @@ Configure in GitHub → Repository → Settings → Notifications:
 ### 8.4 Error Tracking (Optional)
 
 **Sentry Integration**:
+
 ```typescript
 // lib/utils/sentry.ts
 import * as Sentry from '@sentry/nextjs';
@@ -729,13 +753,8 @@ Using Husky and lint-staged:
 // package.json
 {
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,yml}": [
-      "prettier --write"
-    ]
+    "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
+    "*.{json,md,yml}": ["prettier --write"]
   }
 }
 ```
@@ -762,6 +781,7 @@ npm run test
 ## Appendix: Quick Reference
 
 ### CI Commands
+
 ```bash
 # Run locally before pushing
 npm run lint && npm run type-check && npm run test
@@ -774,6 +794,7 @@ npm run test:e2e
 ```
 
 ### Deployment Commands
+
 ```bash
 # Deploy to preview (automatic on PR)
 git push origin feature/my-feature
@@ -788,6 +809,7 @@ vercel rollback [deployment-id]
 ```
 
 ### Debug Commands
+
 ```bash
 # Check Vercel deployment status
 vercel ls --prod

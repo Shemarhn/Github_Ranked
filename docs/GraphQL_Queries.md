@@ -4,6 +4,7 @@
 > **Version**: 1.0.0
 
 ## Table of Contents
+
 1. [Overview](#overview)
 2. [Authentication](#authentication)
 3. [Query: Contribution Years](#query-contribution-years)
@@ -22,11 +23,13 @@
 GitHub Ranked uses GitHub's GraphQL API v4 to fetch user contribution statistics. This document provides the exact queries, variables, and expected responses.
 
 ### API Endpoint
+
 ```
 https://api.github.com/graphql
 ```
 
 ### Request Format
+
 ```http
 POST /graphql HTTP/1.1
 Host: api.github.com
@@ -46,15 +49,17 @@ Content-Type: application/json
 All queries require authentication via a GitHub Personal Access Token (PAT).
 
 ### Required Headers
+
 ```typescript
 const headers = {
-  'Authorization': `Bearer ${token}`,
+  Authorization: `Bearer ${token}`,
   'Content-Type': 'application/json',
   'User-Agent': 'GitHub-Ranked/1.0',
 };
 ```
 
 ### Token Scopes Required
+
 - `read:user` - Read user profile data
 - `public_repo` - Access public repository information
 
@@ -65,6 +70,7 @@ const headers = {
 Fetch the list of years a user has made contributions.
 
 ### Query
+
 ```graphql
 query ContributionYears($login: String!) {
   user(login: $login) {
@@ -76,6 +82,7 @@ query ContributionYears($login: String!) {
 ```
 
 ### Variables
+
 ```json
 {
   "login": "octocat"
@@ -83,6 +90,7 @@ query ContributionYears($login: String!) {
 ```
 
 ### Response
+
 ```json
 {
   "data": {
@@ -96,6 +104,7 @@ query ContributionYears($login: String!) {
 ```
 
 ### TypeScript Implementation
+
 ```typescript
 const CONTRIBUTION_YEARS_QUERY = `
   query ContributionYears($login: String!) {
@@ -108,13 +117,13 @@ const CONTRIBUTION_YEARS_QUERY = `
 `;
 
 async function fetchContributionYears(
-  username: string, 
+  username: string,
   token: string
 ): Promise<number[]> {
   const response = await fetch('https://api.github.com/graphql', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -124,15 +133,15 @@ async function fetchContributionYears(
   });
 
   const data = await response.json();
-  
+
   if (data.errors) {
     throw new Error(data.errors[0].message);
   }
-  
+
   if (!data.data.user) {
     throw new UserNotFoundError(username);
   }
-  
+
   return data.data.user.contributionsCollection.contributionYears;
 }
 ```
@@ -144,6 +153,7 @@ async function fetchContributionYears(
 Fetch contribution statistics for a specific year.
 
 ### Query
+
 ```graphql
 query YearlyStats($login: String!, $from: DateTime!, $to: DateTime!) {
   user(login: $login) {
@@ -159,6 +169,7 @@ query YearlyStats($login: String!, $from: DateTime!, $to: DateTime!) {
 ```
 
 ### Variables
+
 ```json
 {
   "login": "octocat",
@@ -168,6 +179,7 @@ query YearlyStats($login: String!, $from: DateTime!, $to: DateTime!) {
 ```
 
 ### Response
+
 ```json
 {
   "data": {
@@ -185,12 +197,14 @@ query YearlyStats($login: String!, $from: DateTime!, $to: DateTime!) {
 ```
 
 ### Notes
+
 - `totalPullRequestContributions` includes PRs created, not necessarily merged
 - `totalPullRequestReviewContributions` is code reviews submitted
 - `restrictedContributionsCount` is private repo contributions (requires token)
 - Date range must be within the same year (GitHub API limitation)
 
 ### TypeScript Implementation
+
 ```typescript
 const YEARLY_STATS_QUERY = `
   query YearlyStats($login: String!, $from: DateTime!, $to: DateTime!) {
@@ -225,7 +239,7 @@ async function fetchYearlyStats(
   const response = await fetch('https://api.github.com/graphql', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -235,13 +249,13 @@ async function fetchYearlyStats(
   });
 
   const data = await response.json();
-  
+
   if (data.errors) {
     throw new Error(data.errors[0].message);
   }
-  
+
   const collection = data.data.user.contributionsCollection;
-  
+
   return {
     commits: collection.totalCommitContributions,
     prs: collection.totalPullRequestContributions,
@@ -259,6 +273,7 @@ async function fetchYearlyStats(
 Fetch user profile information including follower count.
 
 ### Query
+
 ```graphql
 query UserProfile($login: String!) {
   user(login: $login) {
@@ -278,6 +293,7 @@ query UserProfile($login: String!) {
 ```
 
 ### Response
+
 ```json
 {
   "data": {
@@ -305,6 +321,7 @@ query UserProfile($login: String!) {
 Fetch total stars across user's owned repositories.
 
 ### Query
+
 ```graphql
 query UserStars($login: String!, $first: Int!) {
   user(login: $login) {
@@ -328,6 +345,7 @@ query UserStars($login: String!, $first: Int!) {
 ```
 
 ### Variables
+
 ```json
 {
   "login": "octocat",
@@ -336,6 +354,7 @@ query UserStars($login: String!, $first: Int!) {
 ```
 
 ### Response
+
 ```json
 {
   "data": {
@@ -358,11 +377,9 @@ query UserStars($login: String!, $first: Int!) {
 ```
 
 ### Pagination for Large Repo Counts
+
 ```typescript
-async function fetchAllStars(
-  username: string, 
-  token: string
-): Promise<number> {
+async function fetchAllStars(username: string, token: string): Promise<number> {
   let totalStars = 0;
   let hasNextPage = true;
   let cursor: string | null = null;
@@ -392,7 +409,7 @@ async function fetchAllStars(
     const response = await fetch('https://api.github.com/graphql', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -403,12 +420,13 @@ async function fetchAllStars(
 
     const data = await response.json();
     const repos = data.data.user.repositories;
-    
+
     totalStars += repos.nodes.reduce(
-      (sum: number, repo: { stargazerCount: number }) => sum + repo.stargazerCount, 
+      (sum: number, repo: { stargazerCount: number }) =>
+        sum + repo.stargazerCount,
       0
     );
-    
+
     hasNextPage = repos.pageInfo.hasNextPage;
     cursor = repos.pageInfo.endCursor;
   }
@@ -424,6 +442,7 @@ async function fetchAllStars(
 For efficiency, combine multiple queries into a single request.
 
 ### Query
+
 ```graphql
 query FullUserStats($login: String!, $from: DateTime!, $to: DateTime!) {
   user(login: $login) {
@@ -431,12 +450,12 @@ query FullUserStats($login: String!, $from: DateTime!, $to: DateTime!) {
     login
     name
     createdAt
-    
+
     # Followers
     followers {
       totalCount
     }
-    
+
     # Contributions for specified year
     contributionsCollection(from: $from, to: $to) {
       totalCommitContributions
@@ -446,7 +465,7 @@ query FullUserStats($login: String!, $from: DateTime!, $to: DateTime!) {
       restrictedContributionsCount
       contributionYears
     }
-    
+
     # Repository stars (top 100 repos by stars)
     repositories(
       first: 100
@@ -463,6 +482,7 @@ query FullUserStats($login: String!, $from: DateTime!, $to: DateTime!) {
 ```
 
 ### Variables
+
 ```json
 {
   "login": "octocat",
@@ -472,6 +492,7 @@ query FullUserStats($login: String!, $from: DateTime!, $to: DateTime!) {
 ```
 
 ### Response
+
 ```json
 {
   "data": {
@@ -508,11 +529,13 @@ query FullUserStats($login: String!, $from: DateTime!, $to: DateTime!) {
 ## 8. Rate Limit Considerations
 
 ### GraphQL Rate Limits
+
 - **Primary Rate Limit**: 5,000 points per hour (authenticated)
 - **Query Cost**: Varies by query complexity
 - **Secondary Rate Limits**: Max 100 concurrent requests, 2,000 points/minute
 
 ### Checking Rate Limits
+
 ```graphql
 query RateLimit {
   rateLimit {
@@ -525,6 +548,7 @@ query RateLimit {
 ```
 
 ### Response
+
 ```json
 {
   "data": {
@@ -539,6 +563,7 @@ query RateLimit {
 ```
 
 ### Query Cost Calculation
+
 - Base cost: 1 point per request
 - Additional cost based on:
   - Number of nodes requested
@@ -546,14 +571,16 @@ query RateLimit {
   - Pagination depth
 
 ### Typical Query Costs
-| Query | Estimated Cost |
-|-------|----------------|
-| Contribution Years | 1 point |
-| Yearly Stats | 1 point |
-| Full User Stats | 2-3 points |
+
+| Query                 | Estimated Cost   |
+| --------------------- | ---------------- |
+| Contribution Years    | 1 point          |
+| Yearly Stats          | 1 point          |
+| Full User Stats       | 2-3 points       |
 | Stars with pagination | 1 point per page |
 
 ### Rate Limit Headers
+
 ```http
 X-RateLimit-Limit: 5000
 X-RateLimit-Remaining: 4997
@@ -569,6 +596,7 @@ X-RateLimit-Resource: graphql
 ### Common Errors
 
 **User Not Found**:
+
 ```json
 {
   "data": {
@@ -585,6 +613,7 @@ X-RateLimit-Resource: graphql
 ```
 
 **Rate Limit Exceeded**:
+
 ```json
 {
   "errors": [
@@ -597,6 +626,7 @@ X-RateLimit-Resource: graphql
 ```
 
 **Authentication Error**:
+
 ```json
 {
   "message": "Bad credentials",
@@ -605,6 +635,7 @@ X-RateLimit-Resource: graphql
 ```
 
 ### Error Handling Implementation
+
 ```typescript
 interface GraphQLError {
   type?: string;
@@ -620,7 +651,7 @@ interface GraphQLResponse<T> {
 function handleGraphQLResponse<T>(response: GraphQLResponse<T>): T {
   if (response.errors && response.errors.length > 0) {
     const error = response.errors[0];
-    
+
     switch (error.type) {
       case 'NOT_FOUND':
         throw new UserNotFoundError(error.message);
@@ -632,11 +663,11 @@ function handleGraphQLResponse<T>(response: GraphQLResponse<T>): T {
         throw new GitHubAPIError(error.message);
     }
   }
-  
+
   if (!response.data) {
     throw new GitHubAPIError('No data returned from GitHub API');
   }
-  
+
   return response.data;
 }
 ```
@@ -646,6 +677,7 @@ function handleGraphQLResponse<T>(response: GraphQLResponse<T>): T {
 ## 10. TypeScript Types
 
 ### GraphQL Response Types
+
 ```typescript
 // Contribution collection
 interface ContributionsCollection {
@@ -704,12 +736,13 @@ interface RateLimitInfo {
 ```
 
 ### Aggregated Stats Type
+
 ```typescript
 interface AggregatedStats {
   totalCommits: number;
-  totalMergedPRs: number;       // Using PRs as proxy for merged
+  totalMergedPRs: number; // Using PRs as proxy for merged
   totalCodeReviews: number;
-  totalIssuesClosed: number;    // Using issues as proxy for closed
+  totalIssuesClosed: number; // Using issues as proxy for closed
   totalStars: number;
   totalFollowers: number;
   firstContributionYear: number;
@@ -732,7 +765,7 @@ function aggregateStats(
     { commits: 0, prs: 0, reviews: 0, issues: 0 }
   );
 
-  const years = yearlyStats.map(y => y.year).sort((a, b) => a - b);
+  const years = yearlyStats.map((y) => y.year).sort((a, b) => a - b);
 
   return {
     totalCommits: totals.commits,
@@ -753,6 +786,7 @@ function aggregateStats(
 ## 11. Complete Fetch Implementation
 
 ### Full Data Fetching Function
+
 ```typescript
 interface FetchUserStatsResult {
   stats: AggregatedStats;
@@ -768,53 +802,52 @@ async function fetchUserStats(
   username: string,
   token: string,
   options?: {
-    season?: number;  // If provided, only fetch this year
+    season?: number; // If provided, only fetch this year
   }
 ): Promise<FetchUserStatsResult> {
   // 1. Fetch contribution years
   const years = await fetchContributionYears(username, token);
-  
+
   if (years.length === 0) {
     throw new Error('User has no contribution history');
   }
-  
+
   // 2. Determine which years to fetch
-  const yearsToFetch = options?.season 
-    ? [options.season].filter(y => years.includes(y))
+  const yearsToFetch = options?.season
+    ? [options.season].filter((y) => years.includes(y))
     : years;
-  
+
   // 3. Fetch all years in parallel
-  const yearlyStatsPromises = yearsToFetch.map(year =>
-    fetchYearlyStats(username, year, token)
-      .then(stats => ({ year, stats }))
+  const yearlyStatsPromises = yearsToFetch.map((year) =>
+    fetchYearlyStats(username, year, token).then((stats) => ({ year, stats }))
   );
-  
+
   // 4. Fetch stars (can be done in parallel)
   const starsPromise = fetchAllStars(username, token);
-  
+
   // 5. Fetch followers
   const followersPromise = fetchFollowers(username, token);
-  
+
   // 6. Wait for all data
   const [yearlyResults, totalStars, followers] = await Promise.all([
     Promise.all(yearlyStatsPromises),
     starsPromise,
     followersPromise,
   ]);
-  
+
   // 7. Build yearly stats map
   const yearlyStatsMap = new Map<number, YearlyStats>();
   yearlyResults.forEach(({ year, stats }) => {
     yearlyStatsMap.set(year, { year, ...stats });
   });
-  
+
   // 8. Aggregate
   const aggregated = aggregateStats(
     Array.from(yearlyStatsMap.values()),
     totalStars,
     followers
   );
-  
+
   return {
     stats: aggregated,
     raw: {
@@ -836,6 +869,7 @@ async function fetchUserStats(
 Visit: https://docs.github.com/en/graphql/overview/explorer
 
 **Test Query 1: Check if user exists**
+
 ```graphql
 {
   user(login: "octocat") {
@@ -846,6 +880,7 @@ Visit: https://docs.github.com/en/graphql/overview/explorer
 ```
 
 **Test Query 2: Get contribution years**
+
 ```graphql
 {
   user(login: "octocat") {
@@ -857,10 +892,14 @@ Visit: https://docs.github.com/en/graphql/overview/explorer
 ```
 
 **Test Query 3: Get 2024 stats**
+
 ```graphql
 {
   user(login: "octocat") {
-    contributionsCollection(from: "2024-01-01T00:00:00Z", to: "2024-12-31T23:59:59Z") {
+    contributionsCollection(
+      from: "2024-01-01T00:00:00Z"
+      to: "2024-12-31T23:59:59Z"
+    ) {
       totalCommitContributions
       totalPullRequestContributions
       totalPullRequestReviewContributions
@@ -871,6 +910,7 @@ Visit: https://docs.github.com/en/graphql/overview/explorer
 ```
 
 **Test Query 4: Check rate limit**
+
 ```graphql
 {
   rateLimit {

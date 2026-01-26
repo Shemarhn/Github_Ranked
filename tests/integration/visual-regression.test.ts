@@ -1,7 +1,7 @@
 /**
  * Visual Regression Tests for Rank Card Rendering
  * Tests rank card data processing, theme configuration, and SVG structure.
- * 
+ *
  * Note: Full SVG rendering requires a server to load icons. These tests validate:
  * - Tier/division/theme configurations
  * - Data transformation and formatting
@@ -62,7 +62,7 @@ describe('Visual Regression Tests', () => {
   describe('Tier Configuration', () => {
     it.each(TIERS)('should have valid colors for %s tier', (tier) => {
       const colors = TIER_COLORS[tier];
-      
+
       expect(colors).toBeDefined();
       // primary is a gradient tuple [startColor, endColor]
       expect(colors.primary).toHaveLength(2);
@@ -77,8 +77,16 @@ describe('Visual Regression Tests', () => {
 
     it('should have ascending tier order', () => {
       const expectedOrder = [
-        'Iron', 'Bronze', 'Silver', 'Gold', 'Platinum',
-        'Emerald', 'Diamond', 'Master', 'Grandmaster', 'Challenger'
+        'Iron',
+        'Bronze',
+        'Silver',
+        'Gold',
+        'Platinum',
+        'Emerald',
+        'Diamond',
+        'Master',
+        'Grandmaster',
+        'Challenger',
       ];
       expect(TIERS).toEqual(expectedOrder);
     });
@@ -87,7 +95,7 @@ describe('Visual Regression Tests', () => {
   describe('Theme Configuration', () => {
     it.each(THEMES)('should have valid theme configuration for %s', (theme) => {
       const config = getTheme(theme);
-      
+
       expect(config).toBeDefined();
       expect(config.background).toBeDefined();
       expect(config.background.primary).toBeDefined();
@@ -99,9 +107,8 @@ describe('Visual Regression Tests', () => {
     });
 
     it('should return default theme for unknown theme name', () => {
-      const defaultTheme = getTheme('default');
       const unknownTheme = getTheme('nonexistent' as ThemeName);
-      
+
       // Should fall back to default or handle gracefully
       expect(unknownTheme).toBeDefined();
     });
@@ -110,8 +117,10 @@ describe('Visual Regression Tests', () => {
   describe('Division Validation', () => {
     it.each(DIVISIONS)('should format division %s correctly', (division) => {
       const rank = createMockRank('Gold', division);
-      const tierLabel = rank.division ? `${rank.tier} ${rank.division}` : rank.tier;
-      
+      const tierLabel = rank.division
+        ? `${rank.tier} ${rank.division}`
+        : rank.tier;
+
       expect(tierLabel).toBe(`Gold ${division}`);
     });
 
@@ -125,8 +134,10 @@ describe('Visual Regression Tests', () => {
         wpi: 200000,
         zScore: 4.0,
       };
-      
-      const tierLabel = rank.division ? `${rank.tier} ${rank.division}` : rank.tier;
+
+      const tierLabel = rank.division
+        ? `${rank.tier} ${rank.division}`
+        : rank.tier;
       expect(tierLabel).toBe('Challenger');
     });
   });
@@ -135,14 +146,14 @@ describe('Visual Regression Tests', () => {
     it('should format SR (Elo) rating with commas', () => {
       const rank = createMockRank('Diamond', 'I', 2350);
       const eloLabel = new Intl.NumberFormat('en-US').format(rank.elo);
-      
+
       expect(eloLabel).toBe('2,350');
     });
 
     it('should format large SR values correctly', () => {
       const elos = [100, 1000, 1500, 2500, 3200, 10000];
       const expected = ['100', '1,000', '1,500', '2,500', '3,200', '10,000'];
-      
+
       elos.forEach((elo, i) => {
         const formatted = new Intl.NumberFormat('en-US').format(elo);
         expect(formatted).toBe(expected[i]);
@@ -152,7 +163,7 @@ describe('Visual Regression Tests', () => {
     it('should cap stars at MAX_STARS_CAP', () => {
       const stats = createMockStats();
       stats.totalStars = 100000;
-      
+
       const cappedStars = Math.min(stats.totalStars, MAX_STARS_CAP);
       expect(cappedStars).toBe(MAX_STARS_CAP);
     });
@@ -199,7 +210,7 @@ describe('Visual Regression Tests', () => {
     it('should have valid structure for all tiers', () => {
       TIERS.forEach((tier) => {
         const rank = createMockRank(tier);
-        
+
         expect(rank.tier).toBe(tier);
         expect(typeof rank.elo).toBe('number');
         expect(typeof rank.gp).toBe('number');

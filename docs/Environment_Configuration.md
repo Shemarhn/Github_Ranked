@@ -4,6 +4,7 @@
 > **Version**: 1.0.0
 
 ## Table of Contents
+
 1. [Overview](#overview)
 2. [Required Environment Variables](#required-environment-variables)
 3. [Optional Environment Variables](#optional-environment-variables)
@@ -18,6 +19,7 @@
 This document outlines all environment variables required to run GitHub Ranked in various environments (development, staging, production).
 
 ### Configuration Files
+
 - `.env.local` - Local development (gitignored)
 - `.env.local.example` - Template for local development (committed)
 - Vercel Environment Variables - Staging/Production (via Vercel Dashboard)
@@ -43,6 +45,7 @@ GITHUB_TOKEN_3=ghp_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 ```
 
 **Token Requirements**:
+
 - **Type**: Classic PAT (`ghp_`) or Fine-grained PAT (`github_pat_`)
 - **Required Scopes**:
   - `read:user` - Read user profile information
@@ -51,6 +54,7 @@ GITHUB_TOKEN_3=ghp_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
   - `repo` - Include private repository contributions (if supported)
 
 **Creating a GitHub Token**:
+
 1. Go to GitHub → Settings → Developer Settings → Personal Access Tokens
 2. Click "Generate new token (classic)"
 3. Select scopes: `read:user`, `public_repo`
@@ -70,12 +74,14 @@ UPSTASH_REDIS_REST_TOKEN=Axxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 **Setting Up Upstash Redis**:
+
 1. Go to [Upstash Console](https://console.upstash.com/)
 2. Create a new Redis database
 3. Select region closest to your Vercel deployment
 4. Copy the REST URL and REST Token from the "REST API" section
 
 **Why Upstash?**:
+
 - HTTP-based access (no connection pooling issues)
 - Optimized for serverless/edge environments
 - Free tier: 10,000 commands/day
@@ -248,6 +254,7 @@ RATE_LIMIT_USERNAME=10
 ### 5.1 Token Security
 
 **DO**:
+
 - ✅ Use environment variables for all secrets
 - ✅ Rotate tokens every 90 days
 - ✅ Use fine-grained PATs with minimal scopes
@@ -255,6 +262,7 @@ RATE_LIMIT_USERNAME=10
 - ✅ Monitor token usage in GitHub settings
 
 **DON'T**:
+
 - ❌ Commit tokens to version control
 - ❌ Log tokens in application code
 - ❌ Share tokens between environments
@@ -272,11 +280,11 @@ RATE_LIMIT_USERNAME=10
 
 ### 5.3 Environment Variable Storage
 
-| Environment | Storage Method | Access |
-|------------|----------------|--------|
-| Development | `.env.local` (gitignored) | Local only |
-| Staging | Vercel Environment Variables | Preview deployments |
-| Production | Vercel Environment Variables (encrypted) | Production only |
+| Environment | Storage Method                           | Access              |
+| ----------- | ---------------------------------------- | ------------------- |
+| Development | `.env.local` (gitignored)                | Local only          |
+| Staging     | Vercel Environment Variables             | Preview deployments |
+| Production  | Vercel Environment Variables (encrypted) | Production only     |
 
 ### 5.4 Secrets in CI/CD
 
@@ -297,19 +305,22 @@ env:
 ### 6.1 Common Issues
 
 **Issue: "GitHub API rate limit exceeded"**
+
 ```
 Solution: Add more tokens to the token pool (GITHUB_TOKEN_2, GITHUB_TOKEN_3, etc.)
 ```
 
 **Issue: "Upstash connection failed"**
+
 ```
-Solution: 
+Solution:
 1. Verify UPSTASH_REDIS_REST_URL is correct (should be https://)
 2. Verify UPSTASH_REDIS_REST_TOKEN is correct
 3. Check Upstash dashboard for database status
 ```
 
 **Issue: "Invalid token format"**
+
 ```
 Solution:
 1. Ensure token starts with 'ghp_' (classic) or 'github_pat_' (fine-grained)
@@ -318,6 +329,7 @@ Solution:
 ```
 
 **Issue: "Environment variable not found"**
+
 ```
 Solution:
 1. For local: Check .env.local file exists and is properly formatted
@@ -365,6 +377,7 @@ for (const key of optional) {
 ```
 
 Run with:
+
 ```bash
 npx ts-node scripts/check-config.ts
 ```

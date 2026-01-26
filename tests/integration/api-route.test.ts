@@ -31,7 +31,10 @@ vi.mock('@/lib/renderer/render', () => ({
 }));
 
 import { GET } from '@/app/api/rank/[username]/route';
-import { aggregateAllTimeStats, fetchYearlyStats } from '@/lib/github/aggregator';
+import {
+  aggregateAllTimeStats,
+  fetchYearlyStats,
+} from '@/lib/github/aggregator';
 import { getCachedRank, setCachedRank } from '@/lib/cache';
 import { renderRankCard } from '@/lib/renderer/render';
 import { UserNotFoundError, RateLimitError } from '@/lib/utils/errors';
@@ -67,7 +70,11 @@ const createRequest = (url: string): NextRequest => {
 describe('API Route: GET /api/rank/[username]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getCachedRank).mockResolvedValue({ hit: false, data: null, key: 'test' });
+    vi.mocked(getCachedRank).mockResolvedValue({
+      hit: false,
+      data: null,
+      key: 'test',
+    });
     vi.mocked(setCachedRank).mockResolvedValue(true);
     vi.mocked(aggregateAllTimeStats).mockResolvedValue(mockStats);
     vi.mocked(renderRankCard).mockResolvedValue('<svg>test</svg>');
@@ -121,7 +128,9 @@ describe('API Route: GET /api/rank/[username]', () => {
         key: 'rank:octocat:all:default',
       });
 
-      const request = createRequest('http://localhost/api/rank/octocat?force=true');
+      const request = createRequest(
+        'http://localhost/api/rank/octocat?force=true'
+      );
       const params = Promise.resolve({ username: 'octocat' });
 
       const response = await GET(request, { params });
@@ -131,7 +140,9 @@ describe('API Route: GET /api/rank/[username]', () => {
     });
 
     it('should apply theme parameter', async () => {
-      const request = createRequest('http://localhost/api/rank/octocat?theme=dark');
+      const request = createRequest(
+        'http://localhost/api/rank/octocat?theme=dark'
+      );
       const params = Promise.resolve({ username: 'octocat' });
 
       const response = await GET(request, { params });
@@ -152,7 +163,9 @@ describe('API Route: GET /api/rank/[username]', () => {
         privateContributions: 5,
       });
 
-      const request = createRequest('http://localhost/api/rank/octocat?season=2024');
+      const request = createRequest(
+        'http://localhost/api/rank/octocat?season=2024'
+      );
       const params = Promise.resolve({ username: 'octocat' });
 
       const response = await GET(request, { params });
@@ -176,7 +189,9 @@ describe('API Route: GET /api/rank/[username]', () => {
     });
 
     it('should return 400 for invalid season', async () => {
-      const request = createRequest('http://localhost/api/rank/octocat?season=invalid');
+      const request = createRequest(
+        'http://localhost/api/rank/octocat?season=invalid'
+      );
       const params = Promise.resolve({ username: 'octocat' });
 
       const response = await GET(request, { params });
@@ -187,7 +202,9 @@ describe('API Route: GET /api/rank/[username]', () => {
     });
 
     it('should default to valid theme for invalid theme', async () => {
-      const request = createRequest('http://localhost/api/rank/octocat?theme=invalid');
+      const request = createRequest(
+        'http://localhost/api/rank/octocat?theme=invalid'
+      );
       const params = Promise.resolve({ username: 'octocat' });
 
       const response = await GET(request, { params });
@@ -230,7 +247,9 @@ describe('API Route: GET /api/rank/[username]', () => {
     });
 
     it('should return 500 for unexpected errors', async () => {
-      vi.mocked(aggregateAllTimeStats).mockRejectedValue(new Error('Unexpected'));
+      vi.mocked(aggregateAllTimeStats).mockRejectedValue(
+        new Error('Unexpected')
+      );
 
       const request = createRequest('http://localhost/api/rank/octocat');
       const params = Promise.resolve({ username: 'octocat' });

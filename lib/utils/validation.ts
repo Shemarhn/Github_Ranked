@@ -30,12 +30,11 @@ export const CURRENT_YEAR = new Date().getUTCFullYear();
 /**
  * Zod schema for season parameter.
  */
-export const SEASON_SCHEMA = z
-	.coerce
-	.number()
-	.int()
-	.min(2010)
-	.max(CURRENT_YEAR + 1);
+export const SEASON_SCHEMA = z.coerce
+  .number()
+  .int()
+  .min(2010)
+  .max(CURRENT_YEAR + 1);
 
 /**
  * Zod schema for theme parameter.
@@ -46,59 +45,56 @@ export const THEME_SCHEMA = z.enum(['default', 'dark', 'light', 'minimal']);
  * Zod schema for GitHub token parameter.
  */
 export const TOKEN_SCHEMA = z
-	.string()
-	.regex(TOKEN_REGEX, { message: 'Invalid GitHub token format' });
+  .string()
+  .regex(TOKEN_REGEX, { message: 'Invalid GitHub token format' });
 
 /**
  * Zod schema for force parameter.
  */
-export const FORCE_SCHEMA = z.preprocess(
-	(value) => {
-		if (typeof value === 'boolean') {
-			return value;
-		}
+export const FORCE_SCHEMA = z.preprocess((value) => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
 
-		if (typeof value === 'string') {
-			const normalized = value.trim().toLowerCase();
-			if (normalized === 'true') {
-				return true;
-			}
-			if (normalized === 'false') {
-				return false;
-			}
-		}
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'true') {
+      return true;
+    }
+    if (normalized === 'false') {
+      return false;
+    }
+  }
 
-		return value;
-	},
-	z.boolean()
-);
+  return value;
+}, z.boolean());
 
 /**
  * Validate a GitHub username.
  */
 export function validateUsername(username: string): boolean {
-	return USERNAME_REGEX.test(username);
+  return USERNAME_REGEX.test(username);
 }
 
 /**
  * Validate and normalize a season parameter.
  */
 export function validateSeason(season: string): number | null {
-	const parsed = SEASON_SCHEMA.safeParse(season);
-	return parsed.success ? parsed.data : null;
+  const parsed = SEASON_SCHEMA.safeParse(season);
+  return parsed.success ? parsed.data : null;
 }
 
 /**
  * Validate and normalize a theme parameter.
  */
 export function validateTheme(theme: string): Theme {
-	const parsed = THEME_SCHEMA.safeParse(theme);
-	return parsed.success ? parsed.data : 'default';
+  const parsed = THEME_SCHEMA.safeParse(theme);
+  return parsed.success ? parsed.data : 'default';
 }
 
 /**
  * Validate a GitHub token parameter.
  */
 export function validateToken(token: string): boolean {
-	return TOKEN_REGEX.test(token);
+  return TOKEN_REGEX.test(token);
 }

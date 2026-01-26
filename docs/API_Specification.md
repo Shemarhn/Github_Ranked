@@ -5,6 +5,7 @@
 > **OpenAPI Version**: 3.1.0
 
 ## Table of Contents
+
 1. [Overview](#overview)
 2. [Base URL](#base-url)
 3. [Authentication](#authentication)
@@ -21,6 +22,7 @@
 The GitHub Ranked API provides a single primary endpoint for generating dynamic rank badges for GitHub users. The API is designed to be embedded in GitHub profile READMEs as image URLs.
 
 ### Key Characteristics
+
 - **Protocol**: HTTPS only
 - **Response Format**: SVG (success) or JSON (errors)
 - **Authentication**: Optional (for private repository access)
@@ -32,16 +34,19 @@ The GitHub Ranked API provides a single primary endpoint for generating dynamic 
 ## 2. Base URL
 
 **Production**:
+
 ```
 https://github-ranked.vercel.app/api
 ```
 
 **Staging**:
+
 ```
 https://github-ranked-staging.vercel.app/api
 ```
 
 **Local Development**:
+
 ```
 http://localhost:3000/api
 ```
@@ -51,20 +56,25 @@ http://localhost:3000/api
 ## 3. Authentication
 
 ### Public Access (Default)
+
 No authentication required for basic rank badge generation using public GitHub data.
 
 ### Authenticated Access (Optional)
+
 To include private repository contributions, provide a GitHub Personal Access Token (PAT).
 
 **Methods**:
+
 1. **Query Parameter**: `?token=ghp_xxx` (not recommended for public profiles)
 2. **Authorization Header**: `Authorization: Bearer ghp_xxx` (recommended for programmatic access)
 
 **Required Token Scopes**:
+
 - `read:user` - Read user profile data
 - `repo` (optional) - Access private repository contributions
 
 **Token Format Validation**:
+
 - Classic PAT: Starts with `ghp_`
 - Fine-grained PAT: Starts with `github_pat_`
 
@@ -73,13 +83,15 @@ To include private repository contributions, provide a GitHub Personal Access To
 ## 4. Rate Limiting
 
 ### Limits
-| Limit Type | Threshold | Window |
-|-----------|-----------|--------|
-| Per IP | 100 requests | 1 hour |
-| Per Username | 10 requests | 1 hour |
-| Cache Hits | Not counted | - |
+
+| Limit Type   | Threshold    | Window |
+| ------------ | ------------ | ------ |
+| Per IP       | 100 requests | 1 hour |
+| Per Username | 10 requests  | 1 hour |
+| Cache Hits   | Not counted  | -      |
 
 ### Rate Limit Headers
+
 ```
 X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 95
@@ -87,6 +99,7 @@ X-RateLimit-Reset: 1706187600
 ```
 
 ### Rate Limit Exceeded Response
+
 ```json
 {
   "error": "RateLimitExceeded",
@@ -106,6 +119,7 @@ X-RateLimit-Reset: 1706187600
 Generate a dynamic SVG rank badge for a GitHub user.
 
 **Endpoint**:
+
 ```
 GET /rank/{username}
 ```
@@ -125,6 +139,7 @@ GET /rank/{username}
 | `format` | string | No | `svg` | Response format: `svg` or `json` |
 
 **Success Response (SVG)**:
+
 ```
 HTTP/1.1 200 OK
 Content-Type: image/svg+xml
@@ -137,6 +152,7 @@ X-Cache: HIT
 ```
 
 **Success Response (JSON - when format=json)**:
+
 ```
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -173,11 +189,13 @@ Cache-Control: public, max-age=3600, s-maxage=86400
 Check API health status.
 
 **Endpoint**:
+
 ```
 GET /health
 ```
 
 **Response**:
+
 ```json
 {
   "status": "healthy",
@@ -197,11 +215,13 @@ GET /health
 Get raw statistics without badge generation (for debugging/analytics).
 
 **Endpoint**:
+
 ```
 GET /stats/{username}
 ```
 
 **Response**:
+
 ```json
 {
   "username": "octocat",
@@ -233,23 +253,23 @@ GET /stats/{username}
 interface RankResult {
   tier: Tier;
   division: Division;
-  elo: number;           // 0 - 3500+
-  lp: number;            // 0 - 99
-  percentile: number;    // 0 - 100
-  wpi: number;           // Weighted Performance Index
-  zScore: number;        // Standard deviations from mean
+  elo: number; // 0 - 3500+
+  lp: number; // 0 - 99
+  percentile: number; // 0 - 100
+  wpi: number; // Weighted Performance Index
+  zScore: number; // Standard deviations from mean
 }
 
-type Tier = 
-  | 'Iron' 
-  | 'Bronze' 
-  | 'Silver' 
-  | 'Gold' 
-  | 'Platinum' 
-  | 'Emerald' 
-  | 'Diamond' 
-  | 'Master' 
-  | 'Grandmaster' 
+type Tier =
+  | 'Iron'
+  | 'Bronze'
+  | 'Silver'
+  | 'Gold'
+  | 'Platinum'
+  | 'Emerald'
+  | 'Diamond'
+  | 'Master'
+  | 'Grandmaster'
   | 'Challenger';
 
 type Division = 'I' | 'II' | 'III' | 'IV';
@@ -263,7 +283,7 @@ interface AggregatedStats {
   totalMergedPRs: number;
   totalCodeReviews: number;
   totalIssuesClosed: number;
-  totalStars: number;           // Sum of stars on owned repos
+  totalStars: number; // Sum of stars on owned repos
   totalFollowers: number;
   firstContributionYear: number;
   lastContributionYear: number;
@@ -286,18 +306,18 @@ interface YearlyStats {
 
 ### 6.4 Tier Thresholds
 
-| Tier | Min Elo | Max Elo | Percentile |
-|------|---------|---------|------------|
-| Iron | 0 | 599 | Bottom 20% |
-| Bronze | 600 | 899 | Top 80% |
-| Silver | 900 | 1199 | Top 60% |
-| Gold | 1200 | 1499 | Top 40% |
-| Platinum | 1500 | 1699 | Top 20% |
-| Emerald | 1700 | 1999 | Top 10% |
-| Diamond | 2000 | 2399 | Top 2.5% |
-| Master | 2400 | 2599 | Top 0.5% |
-| Grandmaster | 2600 | 2999 | Top 0.1% |
-| Challenger | 3000 | ∞ | Top 0.02% |
+| Tier        | Min Elo | Max Elo | Percentile |
+| ----------- | ------- | ------- | ---------- |
+| Iron        | 0       | 599     | Bottom 20% |
+| Bronze      | 600     | 899     | Top 80%    |
+| Silver      | 900     | 1199    | Top 60%    |
+| Gold        | 1200    | 1499    | Top 40%    |
+| Platinum    | 1500    | 1699    | Top 20%    |
+| Emerald     | 1700    | 1999    | Top 10%    |
+| Diamond     | 2000    | 2399    | Top 2.5%   |
+| Master      | 2400    | 2599    | Top 0.5%   |
+| Grandmaster | 2600    | 2999    | Top 0.1%   |
+| Challenger  | 3000    | ∞       | Top 0.02%  |
 
 ---
 
@@ -309,33 +329,34 @@ All error responses follow this structure:
 
 ```typescript
 interface ErrorResponse {
-  error: string;       // Error type (PascalCase)
-  code: number;        // HTTP status code
-  message: string;     // Human-readable message
-  details?: object;    // Additional error context (optional)
-  requestId: string;   // Unique request ID for debugging
+  error: string; // Error type (PascalCase)
+  code: number; // HTTP status code
+  message: string; // Human-readable message
+  details?: object; // Additional error context (optional)
+  requestId: string; // Unique request ID for debugging
 }
 ```
 
 ### Error Catalog
 
-| Error Type | Code | Description | User Action |
-|------------|------|-------------|-------------|
-| `ValidationError` | 400 | Invalid request parameters | Check parameter format |
-| `InvalidUsername` | 400 | Username doesn't match GitHub rules | Check username spelling |
-| `InvalidSeason` | 400 | Season year out of valid range | Use year between 2010 and current |
-| `InvalidTheme` | 400 | Theme not in allowed list | Use: default, dark, light, minimal |
-| `InvalidToken` | 400 | Token format invalid | Use valid GitHub PAT |
-| `UserNotFound` | 404 | GitHub user doesn't exist | Verify username exists on GitHub |
-| `RateLimitExceeded` | 429 | Too many requests | Wait and retry (see retryAfter) |
-| `GitHubRateLimited` | 503 | GitHub API rate limit hit | Wait or provide your own token |
-| `TokensExhausted` | 503 | All service tokens exhausted | Try again later or use BYOT |
-| `GitHubAPIError` | 502 | Error from GitHub API | Retry or check GitHub status |
-| `InternalError` | 500 | Unexpected server error | Contact support with requestId |
+| Error Type          | Code | Description                         | User Action                        |
+| ------------------- | ---- | ----------------------------------- | ---------------------------------- |
+| `ValidationError`   | 400  | Invalid request parameters          | Check parameter format             |
+| `InvalidUsername`   | 400  | Username doesn't match GitHub rules | Check username spelling            |
+| `InvalidSeason`     | 400  | Season year out of valid range      | Use year between 2010 and current  |
+| `InvalidTheme`      | 400  | Theme not in allowed list           | Use: default, dark, light, minimal |
+| `InvalidToken`      | 400  | Token format invalid                | Use valid GitHub PAT               |
+| `UserNotFound`      | 404  | GitHub user doesn't exist           | Verify username exists on GitHub   |
+| `RateLimitExceeded` | 429  | Too many requests                   | Wait and retry (see retryAfter)    |
+| `GitHubRateLimited` | 503  | GitHub API rate limit hit           | Wait or provide your own token     |
+| `TokensExhausted`   | 503  | All service tokens exhausted        | Try again later or use BYOT        |
+| `GitHubAPIError`    | 502  | Error from GitHub API               | Retry or check GitHub status       |
+| `InternalError`     | 500  | Unexpected server error             | Contact support with requestId     |
 
 ### Example Error Responses
 
 **Invalid Username (400)**:
+
 ```json
 {
   "error": "InvalidUsername",
@@ -350,6 +371,7 @@ interface ErrorResponse {
 ```
 
 **User Not Found (404)**:
+
 ```json
 {
   "error": "UserNotFound",
@@ -363,6 +385,7 @@ interface ErrorResponse {
 ```
 
 **Rate Limit Exceeded (429)**:
+
 ```json
 {
   "error": "RateLimitExceeded",
@@ -379,6 +402,7 @@ interface ErrorResponse {
 ```
 
 **GitHub Tokens Exhausted (503)**:
+
 ```json
 {
   "error": "TokensExhausted",
@@ -417,7 +441,10 @@ interface ErrorResponse {
 ### 8.4 Badge with Personal Token (HTML - for private repos)
 
 ```html
-<img src="https://github-ranked.vercel.app/api/rank/octocat?token=ghp_xxxxxxxxxxxx" alt="GitHub Rank">
+<img
+  src="https://github-ranked.vercel.app/api/rank/octocat?token=ghp_xxxxxxxxxxxx"
+  alt="GitHub Rank"
+/>
 ```
 
 ### 8.5 Force Refresh Badge
@@ -586,13 +613,25 @@ components:
         cacheExpires:
           type: string
           format: date-time
-    
+
     RankResult:
       type: object
       properties:
         tier:
           type: string
-          enum: [Iron, Bronze, Silver, Gold, Platinum, Emerald, Diamond, Master, Grandmaster, Challenger]
+          enum:
+            [
+              Iron,
+              Bronze,
+              Silver,
+              Gold,
+              Platinum,
+              Emerald,
+              Diamond,
+              Master,
+              Grandmaster,
+              Challenger,
+            ]
         division:
           type: string
           enum: [I, II, III, IV]
@@ -607,7 +646,7 @@ components:
           type: number
           minimum: 0
           maximum: 100
-    
+
     AggregatedStats:
       type: object
       properties:
@@ -627,7 +666,7 @@ components:
           type: integer
         lastContributionYear:
           type: integer
-    
+
     HealthResponse:
       type: object
       properties:
@@ -643,7 +682,7 @@ components:
           type: object
           additionalProperties:
             type: string
-    
+
     ErrorResponse:
       type: object
       required:
@@ -689,11 +728,14 @@ tags:
 ### 10.1 JavaScript/TypeScript
 
 ```typescript
-async function getGitHubRank(username: string, options?: {
-  season?: number;
-  theme?: 'default' | 'dark' | 'light' | 'minimal';
-  token?: string;
-}): Promise<RankResponse> {
+async function getGitHubRank(
+  username: string,
+  options?: {
+    season?: number;
+    theme?: 'default' | 'dark' | 'light' | 'minimal';
+    token?: string;
+  }
+): Promise<RankResponse> {
   const params = new URLSearchParams();
   params.set('format', 'json');
   if (options?.season) params.set('season', options.season.toString());
@@ -730,7 +772,7 @@ def get_github_rank(username: str, season: int = None, theme: str = None, token:
         params['theme'] = theme
     if token:
         params['token'] = token
-    
+
     response = requests.get(
         f'https://github-ranked.vercel.app/api/rank/{username}',
         params=params
@@ -748,6 +790,7 @@ print(f"{rank['username']} is {rank['rank']['tier']} {rank['rank']['division']}"
 ## Changelog
 
 ### v1.0.0 (January 2026)
+
 - Initial API release
 - Core rank badge generation
 - Theme support (default, dark, light, minimal)
