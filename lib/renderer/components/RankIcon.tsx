@@ -1,71 +1,100 @@
 import React from 'react';
 
 import type { Tier } from '../../ranking/types';
-
-const ICON_FILE_BY_TIER: Record<Tier, string> = {
-  Iron: 'iron',
-  Bronze: 'bronze',
-  Silver: 'silver',
-  Gold: 'gold',
-  Platinum: 'platinum',
-  Emerald: 'emerald',
-  Diamond: 'diamond',
-  Master: 'master',
-  Grandmaster: 'grandmaster',
-  Challenger: 'challenger',
-};
+import { TIER_COLORS } from '../../ranking/constants';
 
 const DEFAULT_ICON_SIZE = 64;
 
 export interface RankIconProps {
   tier: Tier;
   size?: number;
-  className?: string;
   style?: React.CSSProperties;
-  title?: string;
-  fallbackTier?: Tier;
 }
 
 /**
- * Renders the tier icon for a given rank tier.
- *
- * @param tier - Rank tier to render.
- * @param size - Icon size (square). Defaults to 64.
- * @param className - Optional CSS class.
- * @param style - Optional inline styles.
- * @param title - Optional tooltip/title.
- * @param fallbackTier - Fallback tier icon when the image fails to load.
+ * Renders an inline tier icon for Satori SVG rendering.
+ * Uses colored shapes instead of external images for Edge Runtime compatibility.
  */
-export function RankIcon({
-  tier,
-  size = DEFAULT_ICON_SIZE,
-  className,
-  style,
-  title,
-  fallbackTier = 'Iron',
-}: RankIconProps) {
-  const iconFile = ICON_FILE_BY_TIER[tier] ?? ICON_FILE_BY_TIER[fallbackTier];
-  const fallbackFile = ICON_FILE_BY_TIER[fallbackTier];
-  const src = `/icons/${iconFile}.svg`;
-  const fallbackSrc = `/icons/${fallbackFile}.svg`;
-  const ariaLabel = `${tier} tier icon`;
+export function RankIcon({ tier, size = DEFAULT_ICON_SIZE, style }: RankIconProps) {
+  const colors = TIER_COLORS[tier];
+  const primaryColor = colors.primary[0];
+  const accentColor = colors.accent;
 
+  // Create a stylized badge shape
   return (
-    <img
-      src={src}
-      width={size}
-      height={size}
-      alt={ariaLabel}
-      title={title ?? ariaLabel}
-      className={className}
-      style={style}
-      data-tier={tier}
-      onError={(event) => {
-        if (event.currentTarget.src !== fallbackSrc) {
-          event.currentTarget.src = fallbackSrc;
-          event.currentTarget.alt = `${fallbackTier} tier icon`;
-        }
+    <div
+      style={{
+        width: size,
+        height: size,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        ...style,
       }}
-    />
+    >
+      {/* Outer ring */}
+      <div
+        style={{
+          position: 'absolute',
+          width: size,
+          height: size,
+          borderRadius: '50%',
+          background: `linear-gradient(135deg, ${primaryColor}, ${colors.primary[1]})`,
+          boxShadow: `0 0 ${size / 8}px ${accentColor}40`,
+        }}
+      />
+      {/* Inner circle */}
+      <div
+        style={{
+          position: 'absolute',
+          width: size * 0.75,
+          height: size * 0.75,
+          borderRadius: '50%',
+          background: `linear-gradient(135deg, ${colors.primary[1]}, ${primaryColor})`,
+          border: `2px solid ${accentColor}`,
+        }}
+      />
+      {/* Tier initial */}
+      <span
+        style={{
+          position: 'relative',
+          fontSize: size * 0.35,
+          fontWeight: 700,
+          color: accentColor,
+          textShadow: `0 1px 2px rgba(0,0,0,0.5)`,
+          zIndex: 1,
+        }}
+      >
+        {getTierInitial(tier)}
+      </span>
+    </div>
   );
+}
+
+function getTierInitial(tier: Tier): string {
+  switch (tier) {
+    case 'Iron':
+      return 'I';
+    case 'Bronze':
+      return 'B';
+    case 'Silver':
+      return 'S';
+    case 'Gold':
+      return 'G';
+    case 'Platinum':
+      return 'P';
+    case 'Emerald':
+      return 'E';
+    case 'Diamond':
+      return 'D';
+    case 'Master':
+      return 'M';
+    case 'Grandmaster':
+      return 'GM';
+    case 'Challenger':
+      return '👑';
+    default:
+      return '?';
+  }
 }
