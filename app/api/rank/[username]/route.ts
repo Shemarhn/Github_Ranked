@@ -25,9 +25,9 @@ import {
 import type { ThemeName } from '@/lib/renderer/themes';
 
 /**
- * Runtime configuration for Edge
+ * Runtime configuration for Node.js (required for WebAssembly)
  */
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 /**
  * GET /api/rank/[username]
