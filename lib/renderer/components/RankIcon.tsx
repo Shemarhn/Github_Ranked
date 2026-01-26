@@ -3,7 +3,7 @@ import React from 'react';
 import type { Tier } from '../../ranking/types';
 import { TIER_COLORS } from '../../ranking/constants';
 
-const DEFAULT_ICON_SIZE = 64;
+const DEFAULT_ICON_SIZE = 72;
 
 export interface RankIconProps {
   tier: Tier;
@@ -11,36 +11,36 @@ export interface RankIconProps {
   style?: React.CSSProperties;
 }
 
-function getTierInitial(tier: Tier): string {
+function getTierSymbol(tier: Tier): string {
   switch (tier) {
     case 'Iron':
-      return 'I';
+      return '⚒';
     case 'Bronze':
-      return 'B';
+      return '🛡';
     case 'Silver':
-      return 'S';
+      return '⚔';
     case 'Gold':
-      return 'G';
+      return '👑';
     case 'Platinum':
-      return 'P';
+      return '💎';
     case 'Emerald':
-      return 'E';
+      return '🔮';
     case 'Diamond':
-      return 'D';
+      return '💠';
     case 'Master':
-      return 'M';
+      return '🏆';
     case 'Grandmaster':
-      return 'GM';
+      return '⭐';
     case 'Challenger':
-      return 'C';
+      return '🔥';
     default:
       return '?';
   }
 }
 
 /**
- * Renders an inline tier icon for Satori SVG rendering.
- * Uses a simple colored circle with tier initial for Edge Runtime compatibility.
+ * Renders a stylish tier badge icon for Satori SVG rendering.
+ * Features a circular badge with glow effect.
  */
 export function RankIcon({
   tier,
@@ -49,6 +49,7 @@ export function RankIcon({
 }: RankIconProps) {
   const colors = TIER_COLORS[tier];
   const primaryColor = colors.primary[0];
+  const secondaryColor = colors.primary[1];
   const accentColor = colors.accent;
 
   return (
@@ -56,9 +57,6 @@ export function RankIcon({
       style={{
         width: size,
         height: size,
-        borderRadius: '50%',
-        background: primaryColor,
-        border: `3px solid ${accentColor}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -66,15 +64,42 @@ export function RankIcon({
         ...style,
       }}
     >
-      <span
+      {/* Outer glow ring */}
+      <div
         style={{
-          fontSize: size * 0.4,
-          fontWeight: 700,
-          color: accentColor,
+          width: size,
+          height: size,
+          borderRadius: '50%',
+          background: `linear-gradient(145deg, ${primaryColor}, ${secondaryColor})`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
-        {getTierInitial(tier)}
-      </span>
+        {/* Inner dark circle */}
+        <div
+          style={{
+            width: size * 0.82,
+            height: size * 0.82,
+            borderRadius: '50%',
+            background: 'linear-gradient(145deg, #1a1a2e, #0f0f1a)',
+            border: `2px solid ${accentColor}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {/* Symbol */}
+          <span
+            style={{
+              fontSize: size * 0.38,
+              display: 'flex',
+            }}
+          >
+            {getTierSymbol(tier)}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

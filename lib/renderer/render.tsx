@@ -12,8 +12,8 @@ export interface RenderRankCardOptions {
   theme?: ThemeName;
 }
 
-const CARD_WIDTH = 400;
-const CARD_HEIGHT = 120;
+const CARD_WIDTH = 495;
+const CARD_HEIGHT = 170;
 
 const FONT_FAMILY = 'Inter';
 
@@ -47,10 +47,12 @@ async function loadFont(weight: number) {
 }
 
 async function loadFonts() {
-  const [regular, semiBold, bold] = await Promise.all([
+  const [regular, medium, semiBold, bold, extraBold] = await Promise.all([
     loadFont(400),
+    loadFont(500),
     loadFont(600),
     loadFont(700),
+    loadFont(800),
   ]);
 
   return [
@@ -58,6 +60,12 @@ async function loadFonts() {
       name: FONT_FAMILY,
       data: regular,
       weight: 400 as const,
+      style: 'normal' as const,
+    },
+    {
+      name: FONT_FAMILY,
+      data: medium,
+      weight: 500 as const,
       style: 'normal' as const,
     },
     {
@@ -70,6 +78,12 @@ async function loadFonts() {
       name: FONT_FAMILY,
       data: bold,
       weight: 700 as const,
+      style: 'normal' as const,
+    },
+    {
+      name: FONT_FAMILY,
+      data: extraBold,
+      weight: 800 as const,
       style: 'normal' as const,
     },
   ];

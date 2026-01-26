@@ -5,7 +5,6 @@ import type { RankResult } from '../ranking/types';
 import { MAX_STARS_CAP, TIER_COLORS } from '../ranking/constants';
 import { RankIcon } from './components/RankIcon';
 import { ProgressBar } from './components/ProgressBar';
-import { RadarChart } from './components/RadarChart';
 import { getTheme, type ThemeName } from './themes';
 
 export interface RankCardProps {
@@ -15,11 +14,12 @@ export interface RankCardProps {
   theme?: ThemeName;
 }
 
-const CARD_WIDTH = 400;
-const CARD_HEIGHT = 120;
+const CARD_WIDTH = 495;
+const CARD_HEIGHT = 170;
 
 /**
  * Main Rank Card component for SVG rendering.
+ * Gaming-inspired design with gradient backgrounds and glowing accents.
  */
 export function RankCard({
   username,
@@ -32,65 +32,274 @@ export function RankCard({
   const tierLabel = rank.division ? `${rank.tier} ${rank.division}` : rank.tier;
   const eloLabel = new Intl.NumberFormat('en-US').format(rank.elo);
 
+  // Stats for the mini stat bar
+  const totalContributions =
+    stats.totalMergedPRs +
+    stats.totalCodeReviews +
+    stats.totalIssuesClosed +
+    stats.totalCommits;
+
   return (
     <div
       style={{
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
         display: 'flex',
-        alignItems: 'center',
-        gap: 16,
-        padding: 16,
-        borderRadius: 8,
-        background: `linear-gradient(135deg, ${themeConfig.background.primary}, ${themeConfig.background.secondary})`,
-        border: `1px solid ${themeConfig.background.border}`,
+        flexDirection: 'column',
+        padding: 20,
+        borderRadius: 16,
+        background:
+          'linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%)',
+        border: `1px solid ${tierColors.primary[0]}40`,
         color: themeConfig.text.primary,
         fontFamily: 'Inter, system-ui, sans-serif',
         boxSizing: 'border-box',
       }}
     >
-      <RankIcon tier={rank.tier} size={64} />
-
+      {/* Header with username */}
       <div
-        style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 12,
+        }}
       >
         <div
           style={{
-            fontSize: 20,
-            fontWeight: 700,
-            letterSpacing: '-0.02em',
-            color: tierColors.accent,
             display: 'flex',
+            alignItems: 'center',
+            gap: 8,
           }}
         >
-          {tierLabel}
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 500,
+              color: '#8b949e',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              display: 'flex',
+            }}
+          >
+            {'GitHub Ranked'}
+          </span>
         </div>
-        <div style={{ fontSize: 16, fontWeight: 600, display: 'flex' }}>
-          {`${eloLabel} SR`}
-        </div>
-        <ProgressBar tier={rank.tier} gp={rank.gp} width={200} />
         <div
           style={{
-            fontSize: 12,
-            color: themeConfig.text.muted,
             display: 'flex',
+            alignItems: 'center',
+            gap: 6,
           }}
         >
-          {username}
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: '#c9d1d9',
+              display: 'flex',
+            }}
+          >
+            {`@${username}`}
+          </span>
         </div>
       </div>
 
-      <RadarChart
-        size={48}
-        tier={rank.tier}
-        metrics={{
-          prs: stats.totalMergedPRs,
-          reviews: stats.totalCodeReviews,
-          issues: stats.totalIssuesClosed,
-          commits: stats.totalCommits,
-          stars: Math.min(stats.totalStars, MAX_STARS_CAP),
+      {/* Main content area */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 20,
+          flex: 1,
         }}
-      />
+      >
+        {/* Rank Icon */}
+        <RankIcon tier={rank.tier} size={80} />
+
+        {/* Rank info */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 6,
+            flex: 1,
+          }}
+        >
+          {/* Tier label */}
+          <div
+            style={{
+              fontSize: 28,
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+              color: tierColors.accent,
+              display: 'flex',
+              textTransform: 'uppercase',
+            }}
+          >
+            {tierLabel}
+          </div>
+
+          {/* Rating */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: 6,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 22,
+                fontWeight: 700,
+                color: '#f0f6fc',
+                display: 'flex',
+              }}
+            >
+              {eloLabel}
+            </span>
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: '#8b949e',
+                display: 'flex',
+              }}
+            >
+              {'Rating'}
+            </span>
+          </div>
+
+          {/* Progress bar */}
+          <ProgressBar tier={rank.tier} gp={rank.gp} width={220} height={6} />
+        </div>
+
+        {/* Stats panel */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            padding: 12,
+            borderRadius: 10,
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 12,
+                color: '#8b949e',
+                width: 50,
+                display: 'flex',
+              }}
+            >
+              {'PRs'}
+            </span>
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#58a6ff',
+                display: 'flex',
+              }}
+            >
+              {stats.totalMergedPRs.toLocaleString()}
+            </span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 12,
+                color: '#8b949e',
+                width: 50,
+                display: 'flex',
+              }}
+            >
+              {'Reviews'}
+            </span>
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#a371f7',
+                display: 'flex',
+              }}
+            >
+              {stats.totalCodeReviews.toLocaleString()}
+            </span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 12,
+                color: '#8b949e',
+                width: 50,
+                display: 'flex',
+              }}
+            >
+              {'Commits'}
+            </span>
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#3fb950',
+                display: 'flex',
+              }}
+            >
+              {stats.totalCommits.toLocaleString()}
+            </span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 12,
+                color: '#8b949e',
+                width: 50,
+                display: 'flex',
+              }}
+            >
+              {'Stars'}
+            </span>
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#f0883e',
+                display: 'flex',
+              }}
+            >
+              {Math.min(stats.totalStars, MAX_STARS_CAP).toLocaleString()}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
