@@ -75,9 +75,10 @@ export function ProgressBar({
           style={{
             fontSize: 10,
             color: colors.accent,
+            display: 'flex',
           }}
         >
-          {Math.round(clampedGp)} GP
+          {`${Math.round(clampedGp)} GP`}
         </span>
       )}
     </div>
