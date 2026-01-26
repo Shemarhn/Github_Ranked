@@ -19,18 +19,18 @@ Add to your GitHub profile README:
 
 ## Tiers
 
-| Tier        | Rating      | Percentile  |
-| ----------- | ----------- | ----------- |
-| Iron        | 0 - 599     | Bottom 5%   |
-| Bronze      | 600 - 899   | 5 - 15%     |
-| Silver      | 900 - 1199  | 15 - 40%    |
-| Gold        | 1200 - 1499 | 40 - 65%    |
-| Platinum    | 1500 - 1699 | 65 - 80%    |
-| Emerald     | 1700 - 1999 | 80 - 90%    |
-| Diamond     | 2000 - 2399 | 90 - 97%    |
-| Master      | 2400 - 2599 | 97 - 99%    |
-| Grandmaster | 2600 - 2999 | 99 - 99.9%  |
-| Challenger  | 3000+       | Top 0.1%    |
+| Tier        | Rating      | Percentile |
+| ----------- | ----------- | ---------- |
+| Iron        | 0 - 599     | Bottom 5%  |
+| Bronze      | 600 - 899   | 5 - 15%    |
+| Silver      | 900 - 1199  | 15 - 40%   |
+| Gold        | 1200 - 1499 | 40 - 65%   |
+| Platinum    | 1500 - 1699 | 65 - 80%   |
+| Emerald     | 1700 - 1999 | 80 - 90%   |
+| Diamond     | 2000 - 2399 | 90 - 97%   |
+| Master      | 2400 - 2599 | 97 - 99%   |
+| Grandmaster | 2600 - 2999 | 99 - 99.9% |
+| Challenger  | 3000+       | Top 0.1%   |
 
 Tiers below Master have divisions (IV → I).
 
@@ -40,11 +40,11 @@ Tiers below Master have divisions (IV → I).
 GET /api/rank/{username}
 ```
 
-| Parameter  | Default   | Description                          |
-| ---------- | --------- | ------------------------------------ |
-| `theme`    | `default` | `default`, `dark`, `light`, `minimal`|
-| `season`   | all-time  | Year (e.g., `2024`)                  |
-| `force`    | `false`   | Bypass cache                         |
+| Parameter | Default   | Description                           |
+| --------- | --------- | ------------------------------------- |
+| `theme`   | `default` | `default`, `dark`, `light`, `minimal` |
+| `season`  | all-time  | Year (e.g., `2024`)                   |
+| `force`   | `false`   | Bypass cache                          |
 
 **Examples:**
 
@@ -58,13 +58,13 @@ GET /api/rank/{username}
 
 Your rank is calculated from:
 
-| Metric        | Weight | Reason                          |
-| ------------- | ------ | ------------------------------- |
-| Merged PRs    | 40%    | Code accepted by peers          |
-| Code Reviews  | 30%    | Mentorship, seniority signal    |
-| Issues Closed | 20%    | Problem-solving                 |
-| Commits       | 10%    | Activity (low to prevent gaming)|
-| Stars         | 5%     | Social proof (capped at 500)    |
+| Metric        | Weight | Reason                           |
+| ------------- | ------ | -------------------------------- |
+| Merged PRs    | 40%    | Code accepted by peers           |
+| Code Reviews  | 30%    | Mentorship, seniority signal     |
+| Issues Closed | 20%    | Problem-solving                  |
+| Commits       | 10%    | Activity (low to prevent gaming) |
+| Stars         | 5%     | Social proof (capped at 500)     |
 
 These are combined into a Weighted Performance Index, normalized against global GitHub activity, then converted to an Elo-style rating.
 
