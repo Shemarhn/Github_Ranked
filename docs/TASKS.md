@@ -590,16 +590,16 @@ Tasks are organized by implementation phase, matching the Implementation Plan. E
 - **ID**: P4-T4
 - **Description**: Create mini radar chart showing metric breakdown
 - **Acceptance Criteria**:
-  - [ ] `RadarChart` component created
-  - [ ] Component displays 5 metrics (PRs, Reviews, Issues, Commits, Stars)
-  - [ ] Component uses SVG for rendering
-  - [ ] Values normalized for display
-  - [ ] Component fits within card layout
-  - [ ] Component exported from `lib/renderer/components/RadarChart.tsx`
+  - [x] `RadarChart` component created
+  - [x] Component displays 5 metrics (PRs, Reviews, Issues, Commits, Stars)
+  - [x] Component uses SVG for rendering
+  - [x] Values normalized for display
+  - [x] Component fits within card layout
+  - [x] Component exported from `lib/renderer/components/RadarChart.tsx`
 - **Estimated Time**: 3 hours
 - **Dependencies**: P0-T2
 - **Priority**: Medium
-- **Status**: 🔴 Not Started
+- **Status**: 🟢 Completed
 
 ### P4-T5: Create Theme System
 - **ID**: P4-T5
