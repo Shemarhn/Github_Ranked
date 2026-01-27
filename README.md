@@ -26,6 +26,7 @@ https://github-ranked.vercel.app/{username}
 ```
 
 The dashboard shows:
+
 - Full GP breakdown by metric
 - Seasonal contribution history with decay visualization
 - Raw vs. decayed stats toggle
@@ -54,11 +55,11 @@ Tiers below Master have divisions (IV to I).
 GET /api/rank/{username}
 ```
 
-| Parameter | Default   | Description                   |
-| --------- | --------- | ----------------------------- |
-| `theme`   | `default` | Card theme (see below)        |
-| `season`  | all-time  | Year (e.g., `2024`)           |
-| `force`   | `false`   | Bypass cache                  |
+| Parameter | Default   | Description            |
+| --------- | --------- | ---------------------- |
+| `theme`   | `default` | Card theme (see below) |
+| `season`  | all-time  | Year (e.g., `2024`)    |
+| `force`   | `false`   | Bypass cache           |
 
 ### Themes
 
@@ -85,13 +86,13 @@ GET /api/rank/{username}
 
 Your rank is calculated from:
 
-| Metric        | Weight | Reason                               |
-| ------------- | ------ | ------------------------------------ |
-| Merged PRs    | 27%    | Code accepted by peers               |
-| Code Reviews  | 27%    | Mentorship, seniority signal         |
-| Issues Closed | 18%    | Problem-solving                      |
-| Stars         | 15%    | Open source impact (capped at 10k)   |
-| Commits       | 13%    | Activity (moderate to prevent gaming)|
+| Metric        | Weight | Reason                                |
+| ------------- | ------ | ------------------------------------- |
+| Merged PRs    | 27%    | Code accepted by peers                |
+| Code Reviews  | 27%    | Mentorship, seniority signal          |
+| Issues Closed | 18%    | Problem-solving                       |
+| Stars         | 15%    | Open source impact (capped at 10k)    |
+| Commits       | 13%    | Activity (moderate to prevent gaming) |
 
 These are combined into a Weighted Performance Index, normalized against global GitHub activity, then converted to an Elo-style rating.
 

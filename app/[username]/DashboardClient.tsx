@@ -53,7 +53,8 @@ export default function DashboardClient({
     stars: {
       count: Math.min(stats.totalStars, MAX_STARS_CAP),
       weight: METRIC_WEIGHTS.stars,
-      contribution: Math.min(stats.totalStars, MAX_STARS_CAP) * METRIC_WEIGHTS.stars,
+      contribution:
+        Math.min(stats.totalStars, MAX_STARS_CAP) * METRIC_WEIGHTS.stars,
     },
   };
 
