@@ -251,15 +251,15 @@ describe('Phase 1: Core Infrastructure', () => {
     });
 
     it('should have correct metric weights', () => {
-      expect(METRIC_WEIGHTS.mergedPRs).toBe(40);
-      expect(METRIC_WEIGHTS.codeReviews).toBe(30);
-      expect(METRIC_WEIGHTS.issuesClosed).toBe(20);
-      expect(METRIC_WEIGHTS.commits).toBe(10);
-      expect(METRIC_WEIGHTS.stars).toBe(5);
+      expect(METRIC_WEIGHTS.mergedPRs).toBe(27);
+      expect(METRIC_WEIGHTS.codeReviews).toBe(27);
+      expect(METRIC_WEIGHTS.issuesClosed).toBe(18);
+      expect(METRIC_WEIGHTS.commits).toBe(13);
+      expect(METRIC_WEIGHTS.stars).toBe(15);
     });
 
     it('should have MAX_STARS_CAP', () => {
-      expect(MAX_STARS_CAP).toBe(500);
+      expect(MAX_STARS_CAP).toBe(10_000);
     });
 
     it('should have tier thresholds for all 10 tiers', () => {

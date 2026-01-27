@@ -91,6 +91,7 @@ export async function GET(
           rank: cacheResult.data.rank,
           stats: cacheResult.data.stats,
           theme,
+          season: season ?? 'all',
         });
 
         return new NextResponse(svg, {
@@ -137,7 +138,13 @@ export async function GET(
     });
 
     // Render SVG
-    const svg = await renderRankCard({ username, rank, stats, theme });
+    const svg = await renderRankCard({
+      username,
+      rank,
+      stats,
+      theme,
+      season: season ?? 'all',
+    });
 
     return new NextResponse(svg, {
       status: 200,

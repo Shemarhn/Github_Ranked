@@ -37,18 +37,18 @@ describe('Ranking Engine - calculateWPI', () => {
 
     const wpi = calculateWPI(stats);
 
-    // Expected: (50*40) + (30*30) + (20*20) + (100*10) + (250*5)
-    //         = 2000 + 900 + 400 + 1000 + 1250 = 5550
-    expect(wpi).toBe(5550);
+    // Expected: (50*27) + (30*27) + (20*18) + (100*13) + (250*15)
+    //         = 1350 + 810 + 360 + 1300 + 3750 = 7570
+    expect(wpi).toBe(7570);
   });
 
-  it('should cap stars at 500', () => {
+  it('should cap stars at 10000', () => {
     const stats: AggregatedStats = {
       totalMergedPRs: 0,
       totalCodeReviews: 0,
       totalIssuesClosed: 0,
       totalCommits: 0,
-      totalStars: 1000, // Above cap
+      totalStars: 15000, // Above cap
       totalFollowers: 0,
       firstContributionYear: 2024,
       lastContributionYear: 2024,
@@ -57,8 +57,8 @@ describe('Ranking Engine - calculateWPI', () => {
 
     const wpi = calculateWPI(stats);
 
-    // Expected: 500 * 5 = 2500 (stars capped)
-    expect(wpi).toBe(2500);
+    // Expected: 10000 * 15 = 150000 (stars capped)
+    expect(wpi).toBe(150000);
   });
 
   it('should return minimum WPI of 1 for zero contributions', () => {
@@ -94,34 +94,34 @@ describe('Ranking Engine - calculateWPI', () => {
       yearsActive: 1,
     };
 
-    // Test merged PRs weight (40)
+    // Test merged PRs weight (27)
     const wpiPRs = calculateWPI({ ...baseStat, totalMergedPRs: 10 });
-    expect(wpiPRs).toBe(400);
+    expect(wpiPRs).toBe(270);
 
-    // Test code reviews weight (30)
+    // Test code reviews weight (27)
     const wpiReviews = calculateWPI({ ...baseStat, totalCodeReviews: 10 });
-    expect(wpiReviews).toBe(300);
+    expect(wpiReviews).toBe(270);
 
-    // Test issues weight (20)
+    // Test issues weight (18)
     const wpiIssues = calculateWPI({ ...baseStat, totalIssuesClosed: 10 });
-    expect(wpiIssues).toBe(200);
+    expect(wpiIssues).toBe(180);
 
-    // Test commits weight (10)
+    // Test commits weight (13)
     const wpiCommits = calculateWPI({ ...baseStat, totalCommits: 10 });
-    expect(wpiCommits).toBe(100);
+    expect(wpiCommits).toBe(130);
 
-    // Test stars weight (5)
+    // Test stars weight (15)
     const wpiStars = calculateWPI({ ...baseStat, totalStars: 10 });
-    expect(wpiStars).toBe(50);
+    expect(wpiStars).toBe(150);
   });
 
-  it('should handle exactly 500 stars without capping', () => {
+  it('should handle exactly 10000 stars without capping', () => {
     const stats: AggregatedStats = {
       totalMergedPRs: 0,
       totalCodeReviews: 0,
       totalIssuesClosed: 0,
       totalCommits: 0,
-      totalStars: 500, // Exactly at cap
+      totalStars: 10000, // Exactly at cap
       totalFollowers: 0,
       firstContributionYear: 2024,
       lastContributionYear: 2024,
@@ -130,8 +130,8 @@ describe('Ranking Engine - calculateWPI', () => {
 
     const wpi = calculateWPI(stats);
 
-    // Expected: 500 * 5 = 2500
-    expect(wpi).toBe(2500);
+    // Expected: 10000 * 15 = 150000
+    expect(wpi).toBe(150000);
   });
 
   it('should handle large numbers correctly', () => {
@@ -140,7 +140,7 @@ describe('Ranking Engine - calculateWPI', () => {
       totalCodeReviews: 500,
       totalIssuesClosed: 300,
       totalCommits: 10000,
-      totalStars: 5000, // Will be capped to 500
+      totalStars: 5000, // Under cap of 10000
       totalFollowers: 100,
       firstContributionYear: 2015,
       lastContributionYear: 2024,
@@ -149,9 +149,9 @@ describe('Ranking Engine - calculateWPI', () => {
 
     const wpi = calculateWPI(stats);
 
-    // Expected: (1000*40) + (500*30) + (300*20) + (10000*10) + (500*5)
-    //         = 40000 + 15000 + 6000 + 100000 + 2500 = 163500
-    expect(wpi).toBe(163500);
+    // Expected: (1000*27) + (500*27) + (300*18) + (10000*13) + (5000*15)
+    //         = 27000 + 13500 + 5400 + 130000 + 75000 = 250900
+    expect(wpi).toBe(250900);
   });
 
   it('should prioritize collaboration metrics over commits', () => {
@@ -171,7 +171,7 @@ describe('Ranking Engine - calculateWPI', () => {
       totalMergedPRs: 0,
       totalCodeReviews: 0,
       totalIssuesClosed: 0,
-      totalCommits: 700, // Same total "work" but all commits
+      totalCommits: 415, // Adjusted for new weights
       totalStars: 0,
       totalFollowers: 0,
       firstContributionYear: 2024,
@@ -183,13 +183,14 @@ describe('Ranking Engine - calculateWPI', () => {
     const wpiCommitHeavy = calculateWPI(commitHeavyStats);
 
     // Collaborative work should be valued higher
-    // Collaborative: (100*40) + (100*30) = 7000
-    // Commit-heavy: (700*10) = 7000
-    expect(wpiCollaborative).toBe(7000);
-    expect(wpiCommitHeavy).toBe(7000);
+    // Collaborative: (100*27) + (100*27) = 5400
+    // Commit-heavy: (415*13) = 5395
+    expect(wpiCollaborative).toBe(5400);
+    expect(wpiCommitHeavy).toBe(5395);
 
-    // They're equal numerically, but the design intent is to reward collaboration
-    // Let's verify with unequal counts
+    // Verify that collaboration is rewarded more than pure commits
+    // With new weights: 50 PRs + 50 reviews = 50*27 + 50*27 = 2700
+    // To match that with commits: 2700/13 = ~208 commits
     const betterCollaborative = calculateWPI({
       ...collaborativeStats,
       totalMergedPRs: 50,
@@ -197,13 +198,13 @@ describe('Ranking Engine - calculateWPI', () => {
     });
     const moreCommits = calculateWPI({
       ...commitHeavyStats,
-      totalCommits: 350,
+      totalCommits: 208,
     });
 
-    // 50*40 + 50*30 = 3500
-    // 350*10 = 3500
-    expect(betterCollaborative).toBe(3500);
-    expect(moreCommits).toBe(3500);
+    // 50*27 + 50*27 = 2700
+    // 208*13 = 2704
+    expect(betterCollaborative).toBe(2700);
+    expect(moreCommits).toBe(2704);
   });
 
   it('should ignore followers in WPI calculation', () => {

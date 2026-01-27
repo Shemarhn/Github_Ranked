@@ -1,0 +1,238 @@
+.dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+  color: #f0f6fc;
+  padding: 40px 20px;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.rankCard {
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.username {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+  color: #f0f6fc;
+}
+
+.tierLabel {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.percentile {
+  font-size: 16px;
+  color: #8b949e;
+  margin: 0;
+}
+
+.section {
+  max-width: 800px;
+  margin: 0 auto 48px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 16px;
+  color: #f0f6fc;
+}
+
+.wpiTotal {
+  font-size: 16px;
+  color: #8b949e;
+  margin: 0 0 16px;
+}
+
+.wpiTotal strong {
+  color: #f0f6fc;
+  font-size: 18px;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.table th {
+  color: #8b949e;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+.table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.contribution {
+  color: #58a6ff;
+  font-weight: 600;
+}
+
+.capped {
+  color: #f0883e;
+  font-size: 12px;
+}
+
+.seasonInfo {
+  font-size: 16px;
+  color: #8b949e;
+  margin: 0 0 8px;
+}
+
+.seasonInfo strong {
+  color: #f0f6fc;
+}
+
+.decayInfo {
+  background: rgba(88, 166, 255, 0.1);
+  border: 1px solid rgba(88, 166, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.decayInfo p {
+  margin: 0;
+  font-size: 13px;
+  color: #8b949e;
+}
+
+.decay {
+  color: #a371f7;
+  font-weight: 500;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #8b949e;
+}
+
+.toggle input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.embedBox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.embedCode {
+  flex: 1;
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  color: #8b949e;
+  word-break: break-all;
+}
+
+.copyButton {
+  background: #238636;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.copyButton:hover {
+  background: #2ea043;
+}
+
+.footer {
+  text-align: center;
+  padding: 24px;
+  color: #8b949e;
+  font-size: 14px;
+}
+
+.footer a {
+  color: #58a6ff;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .dashboard {
+    padding: 20px 16px;
+  }
+
+  .hero {
+    margin-bottom: 32px;
+  }
+
+  .rankCard {
+    width: 100%;
+    height: auto;
+  }
+
+  .username {
+    font-size: 24px;
+  }
+
+  .tierLabel {
+    font-size: 18px;
+  }
+
+  .section {
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+
+  .table th,
+  .table td {
+    padding: 8px 12px;
+  }
+
+  .embedBox {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

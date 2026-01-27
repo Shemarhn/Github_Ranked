@@ -67,6 +67,24 @@ export interface AggregatedStats {
   yearsActive: number;
 }
 
+/**
+ * Yearly stats with decay multiplier applied
+ */
+export interface DecayedYearlyStats extends YearlyStats {
+  decayMultiplier: number;
+}
+
+/**
+ * Extended aggregated stats with yearly breakdown for dashboard display
+ * Includes both raw and decay-adjusted yearly statistics
+ */
+export interface ExtendedAggregatedStats extends AggregatedStats {
+  /** Raw yearly stats before decay */
+  yearlyBreakdown: YearlyStats[];
+  /** Decay-adjusted yearly stats */
+  decayedYearlyBreakdown: DecayedYearlyStats[];
+}
+
 // ============================================================================
 // Repository Types
 // ============================================================================

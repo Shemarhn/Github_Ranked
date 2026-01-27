@@ -10,7 +10,6 @@ export interface ProgressBarProps {
   width?: number;
   height?: number;
   showText?: boolean;
-  className?: string;
   style?: React.CSSProperties;
 }
 
@@ -35,7 +34,6 @@ export function ProgressBar({
   width = DEFAULT_WIDTH,
   height = DEFAULT_HEIGHT,
   showText = true,
-  className,
   style,
 }: ProgressBarProps) {
   const colors = TIER_COLORS[tier];

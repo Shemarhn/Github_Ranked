@@ -12,6 +12,7 @@ export interface RankCardProps {
   rank: RankResult;
   stats: AggregatedStats;
   theme?: ThemeName;
+  season?: number | 'all';
 }
 
 const CARD_WIDTH = 495;
@@ -26,18 +27,17 @@ export function RankCard({
   rank,
   stats,
   theme = 'default',
+  season,
 }: RankCardProps) {
   const themeConfig = getTheme(theme);
   const tierColors = TIER_COLORS[rank.tier];
   const tierLabel = rank.division ? `${rank.tier} ${rank.division}` : rank.tier;
   const eloLabel = new Intl.NumberFormat('en-US').format(rank.elo);
 
-  // Stats for the mini stat bar
-  const totalContributions =
-    stats.totalMergedPRs +
-    stats.totalCodeReviews +
-    stats.totalIssuesClosed +
-    stats.totalCommits;
+  // Determine season label
+  const currentYear = new Date().getUTCFullYear();
+  const seasonLabel =
+    season && season !== 'all' ? `S${season}` : `S${currentYear}`;
 
   return (
     <div
@@ -83,6 +83,19 @@ export function RankCard({
             }}
           >
             {'GitHub Ranked'}
+          </span>
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              color: tierColors.primary[0],
+              backgroundColor: `${tierColors.primary[0]}20`,
+              padding: '2px 6px',
+              borderRadius: 4,
+              display: 'flex',
+            }}
+          >
+            {seasonLabel}
           </span>
         </div>
         <div

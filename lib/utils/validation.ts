@@ -8,7 +8,16 @@ import { z } from 'zod';
 /**
  * Supported theme variants for rank cards.
  */
-export type Theme = 'default' | 'dark' | 'light' | 'minimal';
+export type Theme =
+  | 'default'
+  | 'dark'
+  | 'light'
+  | 'minimal'
+  | 'cyberpunk'
+  | 'ocean'
+  | 'forest'
+  | 'sunset'
+  | 'galaxy';
 
 /**
  * GitHub username validation regex.
@@ -39,7 +48,17 @@ export const SEASON_SCHEMA = z.coerce
 /**
  * Zod schema for theme parameter.
  */
-export const THEME_SCHEMA = z.enum(['default', 'dark', 'light', 'minimal']);
+export const THEME_SCHEMA = z.enum([
+  'default',
+  'dark',
+  'light',
+  'minimal',
+  'cyberpunk',
+  'ocean',
+  'forest',
+  'sunset',
+  'galaxy',
+]);
 
 /**
  * Zod schema for GitHub token parameter.

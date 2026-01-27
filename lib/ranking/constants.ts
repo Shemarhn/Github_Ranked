@@ -36,30 +36,34 @@ export const ELO_PER_SIGMA = 400;
 
 /**
  * Weights for calculating Weighted Performance Index (WPI)
- * Higher weights = more valuable signal of developer skill
+ * Normalized to 100% total - higher weights = more valuable signal
+ *
+ * v2.0 weights prioritize collaboration (PRs + Reviews = 54%)
+ * while giving stars meaningful impact (15%) capped at 10k
  */
 export const METRIC_WEIGHTS = {
-  /** Merged Pull Requests - highest value (peer acceptance, collaboration) */
-  mergedPRs: 40,
+  /** Merged Pull Requests - peer acceptance, collaboration */
+  mergedPRs: 27,
 
-  /** Code Reviews - high value (seniority signal, mentorship) */
-  codeReviews: 30,
+  /** Code Reviews - seniority signal, mentorship */
+  codeReviews: 27,
 
-  /** Issues Closed - medium value (problem-solving) */
-  issuesClosed: 20,
+  /** Issues Closed - problem-solving */
+  issuesClosed: 18,
 
-  /** Commits - low value (prevents commit farming) */
-  commits: 10,
+  /** Stars - open source impact (capped at 10k) */
+  stars: 15,
 
-  /** Stars - lowest value, capped at 500 (social proof, viral distortion prevention) */
-  stars: 5,
+  /** Commits - activity indicator (moderate to prevent farming) */
+  commits: 13,
 } as const;
 
 /**
  * Maximum star count that contributes to ranking
- * Prevents viral repositories from distorting the ranking
+ * Increased to 10,000 to better recognize open source impact
+ * while still preventing extreme viral distortion
  */
-export const MAX_STARS_CAP = 500;
+export const MAX_STARS_CAP = 10_000;
 
 // ============================================================================
 // Tier Thresholds
@@ -163,3 +167,44 @@ export const MAX_GP = 99;
  * Minimum GP value
  */
 export const MIN_GP = 0;
+
+// ============================================================================
+// Seasonal Decay (League of Legends-style soft reset)
+// ============================================================================
+
+/**
+ * Decay multipliers for previous seasons
+ * Implements a soft reset where older contributions have less impact
+ * Similar to competitive game ranking systems
+ */
+export const SEASONAL_DECAY = {
+  /** Current season gets full weight */
+  CURRENT_SEASON: 1.0,
+  /** Previous season (e.g., 2025 when current is 2026) */
+  PREVIOUS_SEASON: 0.6,
+  /** Two seasons ago */
+  TWO_SEASONS_AGO: 0.35,
+  /** Three seasons ago */
+  THREE_SEASONS_AGO: 0.2,
+  /** Four or more seasons ago - minimal legacy weight */
+  LEGACY: 0.1,
+} as const;
+
+/**
+ * Calculate decay multiplier for a given year
+ * @param year - The contribution year
+ * @param currentYear - Current year (defaults to UTC year)
+ * @returns Decay multiplier (0.1 - 1.0)
+ */
+export function getSeasonalDecayMultiplier(
+  year: number,
+  currentYear: number = new Date().getUTCFullYear()
+): number {
+  const yearsAgo = currentYear - year;
+
+  if (yearsAgo <= 0) return SEASONAL_DECAY.CURRENT_SEASON;
+  if (yearsAgo === 1) return SEASONAL_DECAY.PREVIOUS_SEASON;
+  if (yearsAgo === 2) return SEASONAL_DECAY.TWO_SEASONS_AGO;
+  if (yearsAgo === 3) return SEASONAL_DECAY.THREE_SEASONS_AGO;
+  return SEASONAL_DECAY.LEGACY;
+}

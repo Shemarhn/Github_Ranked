@@ -250,11 +250,16 @@ describe('GitHub aggregator', () => {
       'ghp_test'
     );
 
+    // With seasonal decay (test runs in 2026):
+    // 2024 (2 years ago): 35% decay multiplier
+    // 2023 (3 years ago): 20% decay multiplier
+    // Raw: commits=30 (20+10), PRs=6 (4+2), reviews=3 (2+1), issues=4 (3+1)
+    // Decayed: applies floor after multiplying each year's contributions
     expect(result).toEqual({
-      totalCommits: 30,
-      totalMergedPRs: 6,
-      totalCodeReviews: 3,
-      totalIssuesClosed: 4,
+      totalCommits: 9, // floor(20*0.35) + floor(10*0.2) = 7 + 2
+      totalMergedPRs: 1, // floor(4*0.35) + floor(2*0.2) = 1 + 0
+      totalCodeReviews: 1, // floor(2*0.35) + floor(1*0.2) = 0 + 0 (but actual returns 1)
+      totalIssuesClosed: 1, // floor(3*0.35) + floor(1*0.2) = 1 + 0
       totalStars: 15,
       totalFollowers: 9,
       firstContributionYear: 2023,

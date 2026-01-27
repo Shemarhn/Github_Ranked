@@ -4,6 +4,7 @@
  */
 
 import { GitHubAPIError, UserNotFoundError } from '@/lib/utils/errors';
+import { getSeasonalDecayMultiplier } from '@/lib/ranking/constants';
 import { TokenPoolManager } from './tokenPool';
 import {
   buildContributionYearsQuery,
@@ -16,6 +17,7 @@ import {
 } from './client';
 import type {
   AggregatedStats,
+  ExtendedAggregatedStats,
   GraphQLResponse,
   RateLimitInfo,
   YearlyStats,
@@ -272,10 +274,11 @@ export async function fetchYearlyStatsForYears(
 
 /**
  * Aggregate all-time GitHub stats across all contribution years.
+ * Applies seasonal decay - recent years weighted more heavily.
  *
  * @param username - GitHub username
  * @param token - Optional GitHub Personal Access Token
- * @returns AggregatedStats object
+ * @returns AggregatedStats object with decay applied
  * @throws UserNotFoundError if user does not exist
  */
 export async function aggregateAllTimeStats(
@@ -284,9 +287,9 @@ export async function aggregateAllTimeStats(
 ): Promise<AggregatedStats> {
   const years = await fetchContributionYears(username, token);
   const { totalStars, totalFollowers } = await fetchUserMeta(username, token);
+  const currentYear = getCurrentYear();
 
   if (years.length === 0) {
-    const currentYear = getCurrentYear();
     return {
       totalCommits: 0,
       totalMergedPRs: 0,
@@ -302,13 +305,17 @@ export async function aggregateAllTimeStats(
 
   const { stats } = await fetchYearlyStatsForYears(username, years, token);
 
+  // Apply seasonal decay to each year's contributions
   const totals = stats.reduce(
-    (acc, year) => ({
-      commits: acc.commits + year.commits,
-      prs: acc.prs + year.prs,
-      reviews: acc.reviews + year.reviews,
-      issues: acc.issues + year.issues,
-    }),
+    (acc, yearStats) => {
+      const decay = getSeasonalDecayMultiplier(yearStats.year, currentYear);
+      return {
+        commits: acc.commits + Math.round(yearStats.commits * decay),
+        prs: acc.prs + Math.round(yearStats.prs * decay),
+        reviews: acc.reviews + Math.round(yearStats.reviews * decay),
+        issues: acc.issues + Math.round(yearStats.issues * decay),
+      };
+    },
     { commits: 0, prs: 0, reviews: 0, issues: 0 }
   );
 
@@ -328,11 +335,80 @@ export async function aggregateAllTimeStats(
 }
 
 /**
- * Fetch contribution statistics for a specific year.
+ * Aggregate all-time stats with yearly breakdown for dashboard display.
+ * Includes both raw and decay-adjusted statistics.
  *
  * @param username - GitHub username
- * @param year - Contribution year (UTC)
  * @param token - Optional GitHub Personal Access Token
- * @returns YearlyStats for the requested year
+ * @returns ExtendedAggregatedStats with yearly breakdowns
  * @throws UserNotFoundError if user does not exist
  */
+export async function aggregateAllTimeStatsExtended(
+  username: string,
+  token?: string
+): Promise<ExtendedAggregatedStats> {
+  const years = await fetchContributionYears(username, token);
+  const { totalStars, totalFollowers } = await fetchUserMeta(username, token);
+  const currentYear = getCurrentYear();
+
+  if (years.length === 0) {
+    return {
+      totalCommits: 0,
+      totalMergedPRs: 0,
+      totalCodeReviews: 0,
+      totalIssuesClosed: 0,
+      totalStars,
+      totalFollowers,
+      firstContributionYear: currentYear,
+      lastContributionYear: currentYear,
+      yearsActive: 0,
+      yearlyBreakdown: [],
+      decayedYearlyBreakdown: [],
+    };
+  }
+
+  const { stats } = await fetchYearlyStatsForYears(username, years, token);
+
+  // Create decayed yearly breakdown
+  const decayedYearlyBreakdown = stats.map((yearStats) => {
+    const decayMultiplier = getSeasonalDecayMultiplier(
+      yearStats.year,
+      currentYear
+    );
+    return {
+      ...yearStats,
+      decayMultiplier,
+      commits: Math.round(yearStats.commits * decayMultiplier),
+      prs: Math.round(yearStats.prs * decayMultiplier),
+      reviews: Math.round(yearStats.reviews * decayMultiplier),
+      issues: Math.round(yearStats.issues * decayMultiplier),
+    };
+  });
+
+  // Sum decayed totals
+  const totals = decayedYearlyBreakdown.reduce(
+    (acc, yearStats) => ({
+      commits: acc.commits + yearStats.commits,
+      prs: acc.prs + yearStats.prs,
+      reviews: acc.reviews + yearStats.reviews,
+      issues: acc.issues + yearStats.issues,
+    }),
+    { commits: 0, prs: 0, reviews: 0, issues: 0 }
+  );
+
+  const sortedYears = stats.map((stat) => stat.year).sort((a, b) => a - b);
+
+  return {
+    totalCommits: totals.commits,
+    totalMergedPRs: totals.prs,
+    totalCodeReviews: totals.reviews,
+    totalIssuesClosed: totals.issues,
+    totalStars,
+    totalFollowers,
+    firstContributionYear: sortedYears[0],
+    lastContributionYear: sortedYears[sortedYears.length - 1],
+    yearsActive: sortedYears.length,
+    yearlyBreakdown: stats,
+    decayedYearlyBreakdown,
+  };
+}

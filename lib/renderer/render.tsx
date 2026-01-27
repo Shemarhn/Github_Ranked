@@ -10,6 +10,7 @@ export interface RenderRankCardOptions {
   rank: RankResult;
   stats: AggregatedStats;
   theme?: ThemeName;
+  season?: number | 'all';
 }
 
 const CARD_WIDTH = 495;
@@ -97,11 +98,18 @@ export async function renderRankCard({
   rank,
   stats,
   theme = 'default',
+  season,
 }: RenderRankCardOptions): Promise<string> {
   const fonts = await loadFonts();
 
   return satori(
-    <RankCard username={username} rank={rank} stats={stats} theme={theme} />,
+    <RankCard
+      username={username}
+      rank={rank}
+      stats={stats}
+      theme={theme}
+      season={season}
+    />,
     {
       width: CARD_WIDTH,
       height: CARD_HEIGHT,

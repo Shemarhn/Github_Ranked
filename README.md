@@ -1,4 +1,4 @@
-# GitHub Ranked 🎮
+# GitHub Ranked
 
 > Competitive skill ratings for developers based on GitHub contributions
 
@@ -17,6 +17,20 @@ Add to your GitHub profile README:
 ![GitHub Rank](https://github-ranked.vercel.app/api/rank/YOUR_USERNAME)
 ```
 
+## Dashboard
+
+View detailed stats breakdown at:
+
+```
+https://github-ranked.vercel.app/{username}
+```
+
+The dashboard shows:
+- Full GP breakdown by metric
+- Seasonal contribution history with decay visualization
+- Raw vs. decayed stats toggle
+- Embed code for your README
+
 ## Tiers
 
 | Tier        | Rating      | Percentile |
@@ -32,7 +46,7 @@ Add to your GitHub profile README:
 | Grandmaster | 2600 - 2999 | 99 - 99.9% |
 | Challenger  | 3000+       | Top 0.1%   |
 
-Tiers below Master have divisions (IV → I).
+Tiers below Master have divisions (IV to I).
 
 ## API
 
@@ -40,17 +54,30 @@ Tiers below Master have divisions (IV → I).
 GET /api/rank/{username}
 ```
 
-| Parameter | Default   | Description                           |
-| --------- | --------- | ------------------------------------- |
-| `theme`   | `default` | `default`, `dark`, `light`, `minimal` |
-| `season`  | all-time  | Year (e.g., `2024`)                   |
-| `force`   | `false`   | Bypass cache                          |
+| Parameter | Default   | Description                   |
+| --------- | --------- | ----------------------------- |
+| `theme`   | `default` | Card theme (see below)        |
+| `season`  | all-time  | Year (e.g., `2024`)           |
+| `force`   | `false`   | Bypass cache                  |
+
+### Themes
+
+- `default` - GitHub dark
+- `dark` - Pure black
+- `light` - White/light mode
+- `minimal` - Transparent background
+- `cyberpunk` - Neon pink/cyan
+- `ocean` - Deep blue
+- `forest` - Green/nature
+- `sunset` - Warm orange/red
+- `galaxy` - Purple/cosmic
 
 **Examples:**
 
 ```markdown
 ![Rank](https://github-ranked.vercel.app/api/rank/octocat)
-![Rank](https://github-ranked.vercel.app/api/rank/octocat?theme=dark)
+![Rank](https://github-ranked.vercel.app/api/rank/octocat?theme=cyberpunk)
+![Rank](https://github-ranked.vercel.app/api/rank/octocat?theme=ocean)
 ![Rank](https://github-ranked.vercel.app/api/rank/octocat?season=2024)
 ```
 
@@ -58,15 +85,29 @@ GET /api/rank/{username}
 
 Your rank is calculated from:
 
-| Metric        | Weight | Reason                           |
-| ------------- | ------ | -------------------------------- |
-| Merged PRs    | 40%    | Code accepted by peers           |
-| Code Reviews  | 30%    | Mentorship, seniority signal     |
-| Issues Closed | 20%    | Problem-solving                  |
-| Commits       | 10%    | Activity (low to prevent gaming) |
-| Stars         | 5%     | Social proof (capped at 500)     |
+| Metric        | Weight | Reason                               |
+| ------------- | ------ | ------------------------------------ |
+| Merged PRs    | 27%    | Code accepted by peers               |
+| Code Reviews  | 27%    | Mentorship, seniority signal         |
+| Issues Closed | 18%    | Problem-solving                      |
+| Stars         | 15%    | Open source impact (capped at 10k)   |
+| Commits       | 13%    | Activity (moderate to prevent gaming)|
 
 These are combined into a Weighted Performance Index, normalized against global GitHub activity, then converted to an Elo-style rating.
+
+## Seasonal System
+
+GitHub Ranked uses a seasonal decay system inspired by competitive games like League of Legends:
+
+| Season Age     | Weight | Example (in 2026) |
+| -------------- | ------ | ----------------- |
+| Current Season | 100%   | 2026              |
+| Previous       | 60%    | 2025              |
+| 2 years ago    | 35%    | 2024              |
+| 3 years ago    | 20%    | 2023              |
+| 4+ years       | 10%    | 2022 and earlier  |
+
+This ensures your rank reflects recent activity while still rewarding consistent long-term contributions. At each new year, there's effectively a soft reset where your older contributions matter less.
 
 ## Self-Hosting
 
@@ -92,14 +133,14 @@ npm run dev
 
 ## Tech Stack
 
-- **Next.js** — App Router, API routes
-- **Satori** — SVG generation
-- **Upstash Redis** — Caching
-- **GitHub GraphQL API** — Data source
+- **Next.js** - App Router, API routes
+- **Satori** - SVG generation
+- **Upstash Redis** - Caching
+- **GitHub GraphQL API** - Data source
 
 ## Contributing
 
-PRs welcome. Fork → branch → commit → PR.
+PRs welcome. Fork, branch, commit, PR.
 
 ## License
 
