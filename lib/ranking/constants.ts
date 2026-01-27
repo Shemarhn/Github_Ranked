@@ -38,32 +38,33 @@ export const ELO_PER_SIGMA = 400;
  * Weights for calculating Weighted Performance Index (WPI)
  * Normalized to 100% total - higher weights = more valuable signal
  *
- * v2.0 weights prioritize collaboration (PRs + Reviews = 54%)
- * while giving stars meaningful impact (15%) capped at 10k
+ * v3.0 weights heavily prioritize collaboration (PRs + Reviews = 70%)
+ * This makes reaching Diamond+ impossible without peer interactions.
+ * Commits are minimized to prevent "farming" tactics.
  */
 export const METRIC_WEIGHTS = {
-  /** Merged Pull Requests - peer acceptance, collaboration */
-  mergedPRs: 27,
+  /** Merged Pull Requests - peer acceptance, collaboration (35%) */
+  mergedPRs: 35,
 
-  /** Code Reviews - seniority signal, mentorship */
-  codeReviews: 27,
+  /** Code Reviews - seniority signal, mentorship (35%) */
+  codeReviews: 35,
 
-  /** Issues Closed - problem-solving */
-  issuesClosed: 18,
+  /** Issues Closed - problem-solving (15%) */
+  issuesClosed: 15,
 
-  /** Stars - open source impact (capped at 10k) */
-  stars: 15,
+  /** Commits - activity indicator (low to prevent farming) (10%) */
+  commits: 10,
 
-  /** Commits - activity indicator (moderate to prevent farming) */
-  commits: 13,
+  /** Stars - open source impact (capped at 1k) (5%) */
+  stars: 5,
 } as const;
 
 /**
  * Maximum star count that contributes to ranking
- * Increased to 10,000 to better recognize open source impact
- * while still preventing extreme viral distortion
+ * Kept at 1,000 to prevent star-heavy repos from dominating
+ * while still rewarding open source impact
  */
-export const MAX_STARS_CAP = 10_000;
+export const MAX_STARS_CAP = 1_000;
 
 // ============================================================================
 // Tier Thresholds

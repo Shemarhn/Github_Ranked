@@ -27,6 +27,7 @@ export default function DashboardClient({
   const [showRawStats, setShowRawStats] = useState(false);
   const tierColors = TIER_COLORS[rank.tier];
   const tierLabel = rank.division ? `${rank.tier} ${rank.division}` : rank.tier;
+  const topPercent = Math.max(0, 100 - rank.percentile);
 
   // Calculate GP breakdown for display
   const gpBreakdown = {
@@ -51,7 +52,7 @@ export default function DashboardClient({
       contribution: stats.totalCommits * METRIC_WEIGHTS.commits,
     },
     stars: {
-      count: Math.min(stats.totalStars, MAX_STARS_CAP),
+      count: stats.totalStars,
       weight: METRIC_WEIGHTS.stars,
       contribution:
         Math.min(stats.totalStars, MAX_STARS_CAP) * METRIC_WEIGHTS.stars,
@@ -77,7 +78,7 @@ export default function DashboardClient({
           {tierLabel} - {rank.elo.toLocaleString()} Rating
         </p>
         <p className={styles.percentile}>
-          Top {(100 - rank.percentile).toFixed(1)}% of developers
+          Percentile {rank.percentile.toFixed(1)} (Top {topPercent.toFixed(1)}%)
         </p>
       </section>
 

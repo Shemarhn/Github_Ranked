@@ -86,15 +86,15 @@ GET /api/rank/{username}
 
 Your rank is calculated from:
 
-| Metric        | Weight | Reason                                |
-| ------------- | ------ | ------------------------------------- |
-| Merged PRs    | 27%    | Code accepted by peers                |
-| Code Reviews  | 27%    | Mentorship, seniority signal          |
-| Issues Closed | 18%    | Problem-solving                       |
-| Stars         | 15%    | Open source impact (capped at 10k)    |
-| Commits       | 13%    | Activity (moderate to prevent gaming) |
+| Metric        | Weight | Reason                               |
+| ------------- | ------ | ------------------------------------ |
+| Merged PRs    | 35%    | Code accepted by peers               |
+| Code Reviews  | 35%    | Mentorship, seniority signal         |
+| Issues Closed | 15%    | Problem-solving                      |
+| Commits       | 10%    | Activity (low to prevent farming)    |
+| Stars         | 5%     | Open source impact (capped at 1k)    |
 
-These are combined into a Weighted Performance Index, normalized against global GitHub activity, then converted to an Elo-style rating.
+Collaboration metrics (PRs + Reviews) account for **70%** of your score, making it impossible to reach Diamond+ without peer interaction. The badge displays total stars, but calculations cap at 1,000.
 
 ## Seasonal System
 

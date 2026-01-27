@@ -2,7 +2,7 @@ import React from 'react';
 
 import type { AggregatedStats } from '../github/types';
 import type { RankResult } from '../ranking/types';
-import { MAX_STARS_CAP, TIER_COLORS } from '../ranking/constants';
+import { TIER_COLORS } from '../ranking/constants';
 import { RankIcon } from './components/RankIcon';
 import { ProgressBar } from './components/ProgressBar';
 import { getTheme, type ThemeName } from './themes';
@@ -308,7 +308,7 @@ export function RankCard({
                 display: 'flex',
               }}
             >
-              {Math.min(stats.totalStars, MAX_STARS_CAP).toLocaleString()}
+              {stats.totalStars.toLocaleString()}
             </span>
           </div>
         </div>
