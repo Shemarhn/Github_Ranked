@@ -86,13 +86,13 @@ GET /api/rank/{username}
 
 Your rank is calculated from:
 
-| Metric        | Weight | Reason                               |
-| ------------- | ------ | ------------------------------------ |
-| Merged PRs    | 35%    | Code accepted by peers               |
-| Code Reviews  | 35%    | Mentorship, seniority signal         |
-| Issues Closed | 15%    | Problem-solving                      |
-| Commits       | 10%    | Activity (low to prevent farming)    |
-| Stars         | 5%     | Open source impact (capped at 1k)    |
+| Metric        | Weight | Reason                            |
+| ------------- | ------ | --------------------------------- |
+| Merged PRs    | 35%    | Code accepted by peers            |
+| Code Reviews  | 35%    | Mentorship, seniority signal      |
+| Issues Closed | 15%    | Problem-solving                   |
+| Commits       | 10%    | Activity (low to prevent farming) |
+| Stars         | 5%     | Open source impact (capped at 1k) |
 
 Collaboration metrics (PRs + Reviews) account for **70%** of your score, making it impossible to reach Diamond+ without peer interaction. The badge displays total stars, but calculations cap at 1,000.
 
