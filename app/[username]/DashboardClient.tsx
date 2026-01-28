@@ -66,7 +66,7 @@ export default function DashboardClient({
       {/* Hero Section */}
       <section className={styles.hero}>
         <Image
-          src={`/api/rank/${username}`}
+          src={`/api/rank/${username}?force=true`}
           alt={`${username}'s GitHub Rank`}
           width={495}
           height={170}
