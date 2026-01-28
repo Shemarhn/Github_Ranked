@@ -59,7 +59,7 @@ export default function DashboardClient({
     },
   };
 
-  const embedCode = `![GitHub Rank](https://github-ranked.vercel.app/api/rank/${username})`;
+  const embedCode = `![GitHub Rank](https://github-ranked.vercel.app/api/rank/${username}?force=true)`;
 
   return (
     <main className={styles.dashboard}>
