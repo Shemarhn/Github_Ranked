@@ -60,7 +60,7 @@ export default function DashboardClient({
   };
 
   const rankCardUrl = `/api/rank/${username}?force=true&v=${rank.elo}&stars=${stats.totalStars}`;
-  const embedCode = `![GitHub Rank](https://github-ranked.vercel.app/api/rank/${username}?force=true&v=${rank.elo}&stars=${stats.totalStars})`;
+  const embedCode = `![GitHub Rank](https://github-ranked.vercel.app/api/rank/${username}?force=true)`;
 
   return (
     <main className={styles.dashboard}>
