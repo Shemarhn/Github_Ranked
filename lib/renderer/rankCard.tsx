@@ -48,9 +48,8 @@ export function RankCard({
         flexDirection: 'column',
         padding: 20,
         borderRadius: 16,
-        background:
-          'linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%)',
-        border: `1px solid ${tierColors.primary[0]}40`,
+        background: `linear-gradient(135deg, ${themeConfig.background.primary} 0%, ${themeConfig.background.secondary} 50%, ${themeConfig.background.primary} 100%)`,
+        border: `1px solid ${themeConfig.background.border}`,
         color: themeConfig.text.primary,
         fontFamily: 'Inter, system-ui, sans-serif',
         boxSizing: 'border-box',
@@ -76,7 +75,7 @@ export function RankCard({
             style={{
               fontSize: 11,
               fontWeight: 500,
-              color: '#8b949e',
+              color: themeConfig.text.secondary,
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
               display: 'flex',
@@ -109,7 +108,7 @@ export function RankCard({
             style={{
               fontSize: 13,
               fontWeight: 600,
-              color: '#c9d1d9',
+              color: themeConfig.text.primary,
               display: 'flex',
             }}
           >
@@ -165,7 +164,7 @@ export function RankCard({
               style={{
                 fontSize: 22,
                 fontWeight: 700,
-                color: '#f0f6fc',
+                color: themeConfig.text.primary,
                 display: 'flex',
               }}
             >
@@ -175,7 +174,7 @@ export function RankCard({
               style={{
                 fontSize: 13,
                 fontWeight: 500,
-                color: '#8b949e',
+                color: themeConfig.text.secondary,
                 display: 'flex',
               }}
             >
@@ -195,8 +194,8 @@ export function RankCard({
             gap: 8,
             padding: 12,
             borderRadius: 10,
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.06)',
+            background: `${themeConfig.background.secondary}80`,
+            border: `1px solid ${themeConfig.background.border}40`,
           }}
         >
           <div
@@ -209,7 +208,7 @@ export function RankCard({
             <span
               style={{
                 fontSize: 12,
-                color: '#8b949e',
+                color: themeConfig.text.secondary,
                 width: 50,
                 display: 'flex',
               }}
@@ -237,7 +236,7 @@ export function RankCard({
             <span
               style={{
                 fontSize: 12,
-                color: '#8b949e',
+                color: themeConfig.text.secondary,
                 width: 50,
                 display: 'flex',
               }}
@@ -265,7 +264,7 @@ export function RankCard({
             <span
               style={{
                 fontSize: 12,
-                color: '#8b949e',
+                color: themeConfig.text.secondary,
                 width: 50,
                 display: 'flex',
               }}
@@ -293,7 +292,7 @@ export function RankCard({
             <span
               style={{
                 fontSize: 12,
-                color: '#8b949e',
+                color: themeConfig.text.secondary,
                 width: 50,
                 display: 'flex',
               }}
