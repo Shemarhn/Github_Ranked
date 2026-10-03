@@ -178,7 +178,9 @@ export function RankCard({
                 display: 'flex',
               }}
             >
-              {'Rating'}
+              {rank.populationSize
+                ? `Top ${(100 - rank.percentile).toFixed(2)}% cached`
+                : 'Rating'}
             </span>
           </div>
 
@@ -194,7 +196,10 @@ export function RankCard({
             gap: 8,
             padding: 12,
             borderRadius: 10,
-            background: `${themeConfig.background.secondary}80`,
+            background:
+              themeConfig.background.secondary === 'transparent'
+                ? 'transparent'
+                : `${themeConfig.background.secondary}80`,
             border: `1px solid ${themeConfig.background.border}40`,
           }}
         >

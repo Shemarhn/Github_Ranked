@@ -60,7 +60,7 @@ describe('Cache Service', () => {
 
       expect(result.hit).toBe(false);
       expect(result.data).toBeNull();
-      expect(result.key).toBe('rank:octocat:all:default');
+      expect(result.key).toBe('rank-v4:octocat:all:default');
     });
 
     it('should return cache miss when key not found', async () => {
@@ -71,7 +71,7 @@ describe('Cache Service', () => {
 
       expect(result.hit).toBe(false);
       expect(result.data).toBeNull();
-      expect(redisGet).toHaveBeenCalledWith('rank:octocat:all:default');
+      expect(redisGet).toHaveBeenCalledWith('rank-v4:octocat:all:default');
     });
 
     it('should return cache hit with valid data', async () => {
@@ -131,7 +131,7 @@ describe('Cache Service', () => {
 
       await getCachedRank('octocat', { season: 2024, theme: 'dark' });
 
-      expect(redisGet).toHaveBeenCalledWith('rank:octocat:2024:dark');
+      expect(redisGet).toHaveBeenCalledWith('rank-v4:octocat:2024:dark');
     });
 
     it('should handle errors gracefully', async () => {
@@ -163,7 +163,7 @@ describe('Cache Service', () => {
 
       expect(result).toBe(true);
       expect(redisSet).toHaveBeenCalledWith(
-        'rank:octocat:all:default',
+        'rank-v4:octocat:all:default',
         expect.objectContaining({
           username: 'octocat',
           rank: mockRank,
@@ -181,7 +181,7 @@ describe('Cache Service', () => {
       await setCachedRank('octocat', mockRank, mockStats, { ttl: customTTL });
 
       expect(redisSet).toHaveBeenCalledWith(
-        'rank:octocat:all:default',
+        'rank-v4:octocat:all:default',
         expect.anything(),
         customTTL
       );
@@ -197,7 +197,7 @@ describe('Cache Service', () => {
       });
 
       expect(redisSet).toHaveBeenCalledWith(
-        'rank:octocat:2024:dark',
+        'rank-v4:octocat:2024:dark',
         expect.anything(),
         expect.any(Number)
       );

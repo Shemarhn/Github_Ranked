@@ -1,133 +1,122 @@
-# Evidence assessment algorithm 2.0.0
+# Badge algorithm v4
 
-## Purpose and epistemic limits
+GitHub Ranked is a game for profile badges. Every valid public user gets a tier,
+including Iron IV for an inactive profile. There is no assessment gate, manual
+review, or “unrated” state. These points describe visible activity, not overall
+engineering ability.
 
-This version implements a public contribution index and a separate, explicitly reviewed engineering-quality rubric. It does not infer intelligence, employability, or overall developer ability from GitHub metadata. It does not advertise calibrated percentiles or statistical confidence intervals. Its weights, thresholds, and evidence requirements are provisional policy choices, not learned facts.
+## Public contribution points
 
-The SPACE research warns against equating activity with developer productivity: https://www.microsoft.com/en-us/research/publication/the-space-of-developer-productivity-theres-more-to-it-than-you-think/
+For each contribution year, inspect the latest 100 PR contributions, 100 review
+contributions and 100 issue contributions, plus commits across up to 100
+repositories (up to 100 daily commit buckets per repository). These are bounded observations, not extrapolated lifetime totals.
+The dashboard flags histories that reach these limits. A PR is assigned to the
+year it was opened; its current merged state determines eligibility. Issues use
+their opening year and current closed state. Reviews use their contribution year.
 
-GitHub field meanings and visibility limits: https://docs.github.com/en/graphql/reference/users
+- Count only public, merged PRs; deduplicate by PR ID.
+- Count submitted, non-dismissed reviews of other human authors' PRs, once per
+  PR per year. A review need not approve or lead to a merge to count.
+- Count closed issues authored by the profile, once per issue. This does not
+  claim that the author fixed the issue.
+- Private repositories and hidden contribution totals earn no points.
+- Stars come from the top 100 public, non-fork repositories owned by the user.
+  Followers do not affect the score.
 
-## Automatic contribution index
+For PRs and reviews, group separately by repository owner and interaction partner
+(merger for PRs, PR author for reviews). Within each group, the first ten items
+count fully; thereafter credit is `10 + sqrt(count - 10)`. Use the **smaller** of
+the owner-group total and partner-group total. Thus 100 PRs merged by one partner
+earn about 19.49 units, even when split across repositories. Missing merger
+identities fall back to the repository owner. This reduces rewards for repeated
+pair farming without declaring small teams fraudulent. Self-merged PRs still
+count; independent maintainers remain eligible.
 
-1. Collect eligible public commit contribution days and public review contributions for each UTC month in the window.
-2. Search actual merged PRs by author and merge date. Check returned author, visibility, fork status, and timestamp.
-3. Exclude private repositories, fork repositories, self-reviews, reviews of bot-authored PRs, and pending/dismissed reviews. Fork contributions merged into an upstream non-fork repository can count there. Excluding fork-only work is a known coverage limitation, not a judgment about its quality.
-4. Deduplicate GitHub event identities. Review observations count each reviewed PR once over the entire window. Canonical timestamp ordering makes repeated input order irrelevant.
-5. D is the sum of min(3, distinct delivery dates) for each month. Delivery dates include merged PRs and eligible commit contribution days, with no extra credit for their overlap.
-6. R is the sum of min(3, distinct other PR authors reviewed) for each month. This caps any one counterpart at one monthly unit.
-7. M is the number of months containing eligible public events.
-8. If collection is incomplete, M < 3, or max(D,R) < 6: score = null, tier = Unrated.
-9. Otherwise:
+Closed issues use the same owner grouping. Commits use owner grouping with a
+threshold of 100: `100 + sqrt(count - 100)` thereafter. Splitting commits among
+repositories owned by the same account does not increase credit.
 
-```text
-S = round_to_0.1(80 * (1 - exp(-max(D,R)/12)) + 20 * min(M/6,1))
-```
+Apply the existing seasonal multipliers to these units: 1, 0.6, 0.35, 0.2 and
+0.1 for current, previous, two-year-old, three-year-old and older contributions.
+Round each year's adjusted units, then sum. A single-season badge skips decay.
+Decay is a game rule for recent activity, not a claim that old software loses value.
 
-The better of the delivery and review tracks avoids requiring a solo contributor to manufacture collaboration or a review specialist to manufacture commits. The exponential curve has diminishing marginal returns. The monthly cap limits bursts; continuity saturates after six observed months, with no streak requirement. Neither activity track may be interpreted as work quality.
+Each metric then contributes `multiplier × scale × ln(1 + units / scale)`:
 
-Tier bands [0,10), [10,20), ... [90,100] correspond to Iron through Challenger. Because the evidence threshold withholds sparse results, some lower bands are not normally reachable. Keeping familiar names is presentation continuity, not continuity of the old scale. V1 scores and v2 scores are not comparable.
+| Metric                       | Multiplier | Scale |              Additional cap |
+| ---------------------------- | ---------: | ----: | --------------------------: |
+| Merged PR credit             |         35 |    50 | Bounded yearly observations |
+| Review credit                |         35 |    50 | Bounded yearly observations |
+| Closed authored issue credit |         15 |    30 | Bounded yearly observations |
+| Commit credit                |         10 |   200 |                10,000 units |
+| Stars                        |          5 |   100 |                 1,000 stars |
 
-### Rationale and residual gaming
+Round each component to two decimals, sum, and floor the score at 1 for an empty
+profile. These are adjustable game multipliers, not empirically validated
+percentages of developer skill. Diminishing returns reduce the value of volume
+without adding an eligibility requirement.
 
-The 80/20 split makes the chosen contribution track dominant while bounding the effect of observation duration. The scale 12 and monthly cap three keep another busy day from producing unlimited gains. These are inspectable starting assumptions that must be evaluated, not scientific findings.
+## Population percentiles and tiers
 
-A two-account review loop cannot earn more than one review unit per month. Many cooperating accounts cannot earn more than three per month. Repeated counterpart share is disclosed, never used as proof of dishonesty. Existing colleagues and small teams naturally interact repeatedly.
+Every successful badge/dashboard lookup and sampling run inserts its score into
+Redis. Each GitHub account ID has one entry per season, independent of themes,
+repeat requests, case, or username changes. Failed or partial GitHub fetches do
+not publish scores. Old algorithm caches use separate keys and cannot mix with v4.
 
-A person can still farm distinct activity days across months. Metadata cannot distinguish every empty change from a useful one. This remaining vulnerability is why the badge is explicitly a contribution index and cannot populate the quality profile. No star counts, followers, lines, repository prestige, account age, language count, or contribution streaks enter the formula.
+Scores expire from the comparison population after 30 days without a fresh
+GitHub observation. Reading a cached badge does not refresh the observation date.
+Insertion, expiry and counting happen in one atomic Redis operation. All-time
+and individual seasons have separate populations.
 
-### Collection completeness and cost
+`percentile = 100 × number of profiles with a strictly lower score / population size`
 
-The recent window covers the current UTC month and eleven previous months, ending at collection time. Historical windows cover a requested calendar year, clipped at now.
+Ties receive equal percentiles. Zero-score ties sit at the bottom; a one-account
+population starts at percentile zero. Percentiles are not rounded before tier
+placement. Rating is linearly interpolated within the percentile/rating bands
+in the README, then floored. Challenger starts at the 99.9th percentile.
 
-Each monthly query reads at most 100 repositories, three commit contribution days per repository, and 100 reviewed-PR contributions. Three days per repository are sufficient for the global monthly delivery cap: either some repository reaches three distinct dates (saturating the cap), or every repository's available dates are read. The displayed event list is bounded evidence for scoring, not a complete GitHub activity export.
+The displayed population is **cached observed profiles**, including background
+samples; it is not a census of all GitHub accounts. Visitor selection, finite
+sample size and 30-day turnover affect rankings. Adding profiles can change a
+rank even if its own contributions do not change. Badges may lag for their cache
+duration. The dashboard displays the population size.
 
-More than 100 commit repositories or additional review pages mark the snapshot incomplete. Merged-PR search follows up to four pages of 50; remaining pages also mark it incomplete. GitHub search indexing can lag and is not a transactional snapshot. API failures are errors, not empty profiles. Large profiles may be Unrated until a future background collection pipeline supports them.
+If Redis is unavailable, retain a score-based game tier using the original
+fixed curve `rating = max(0, round(1200 + 400 × (ln(score) - 6.5) / 1.5))`.
+Hide the curve-derived percentile and label the comparison unavailable. This
+fallback never claims to be a measured global percentile and never says unrated.
 
-Public data is filtered before storage or display, even if the host token can access private repositories. No private identifiers or private totals are exposed. Missing public contributions may reflect work elsewhere, attribution settings, or unavailable private work; they do not establish poor performance.
+## Background sampling
 
-Redis stores public snapshots in an algorithm-versioned namespace for one hour. Scores are recomputed with the deployed rubric reviews. Badge and dashboard share the service. No cross-version cache reuse is possible. Invalid, stale, or mismatched cached snapshots are ignored. Incomplete snapshots and errors are not cached by the service.
+`GET /api/population` is protected by `Authorization: Bearer CRON_SECRET` and
+scheduled daily by Vercel at 05:17 UTC. It draws up to 20 random numeric account
+IDs and scores up to five distinct public human accounts. The upper bound is
+refreshed from GitHub's newest-user search. `/users?since=id-1&per_page=1` is accepted
+only when its first result has **exactly** the drawn ID: gaps, deleted accounts
+and organizations are skipped rather than transferring their probability to the
+next account. Inactive users are included. This reaches outside badge visitors
+without sorting candidates by stars, followers or activity.
 
-## Reviewed engineering quality
+The discovered ID bound depends on search freshness; this is a bounded public
+sample, not proof of complete GitHub coverage. A small daily batch starts the
+population modestly. Authorized manual runs can grow it; GitHub rate limits and
+Redis costs still apply. A lock prevents overlapping jobs. Each successful
+profile is cached immediately, so a later failure does not discard prior work.
+The job also populates the current season; older seasons grow through lookups.
 
-Five dimensions are deliberately separated from metadata:
+Set `CRON_SECRET` to a random server-side secret in Vercel and redeploy to enable
+the job. Keep the existing GitHub and Upstash credentials configured. Without
+the secret the sampling endpoint rejects requests; normal profile lookups still
+build the population. Inspect cron responses/logs for `sampled` and `cached` counts.
 
-| Dimension     | Evidence to inspect                                                                  | Inference to avoid                                                |
-| ------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| Correctness   | Requirements, implementation, meaningful tests, failure cases, verified bug fixes    | Green CI or test-file presence proves correctness                 |
-| Judgment      | Tradeoffs, constraints, simplicity, maintainability, design rationale                | Large diffs or complex architecture prove sophistication          |
-| Ownership     | Delivered outcomes, follow-through, maintenance, appropriate handover                | Frequent activity or permanent availability proves responsibility |
-| Collaboration | Concrete review improvements, explanations, coordination, mentoring outcomes         | Approval count or verbose comments prove helpfulness              |
-| Impact        | Demonstrated problem resolution, retained utility, adoption attributable to the work | Popularity or team success is wholly attributable to one person   |
+## Limits of abuse resistance
 
-### Anchored 0–4 rubric
-
-The same scale applies within each dimension, interpreted through the dimension's evidence above:
-
-- **0 — demonstrated serious shortfall:** the sampled artifact has a material, unresolved failure in this dimension, supported by evidence. Never use 0 for missing information.
-- **1 — limited demonstration:** some relevant work is present, but a substantial documented gap remains.
-- **2 — adequate for the stated context:** meets the relevant requirements and constraints with defensible execution.
-- **3 — strong demonstration:** handles meaningful edge cases or tradeoffs and provides evidence of a beneficial result.
-- **4 — exceptional demonstration within context:** a clearly substantiated, unusually strong result with transferable reasoning; does not require a famous employer, large project, or popular repository.
-
-A reviewer must identify the context, cite the artifact, explain the dimension-specific judgment, and distinguish observed outcomes from assumptions. Documentation, research software, tiny critical fixes, and solo projects are eligible. A lack of public collaboration should remain unassessed if no suitable samples exist.
-
-### Aggregation
-
-For each artifact/dimension, average distinct reviewers' 0–4 scores. An artifact qualifies only with at least two independent reviewers. Give each qualifying artifact equal weight, regardless of review count.
-
-Require at least three qualifying artifacts per dimension. If any double-reviewed artifact has a reviewer score range greater than one, withhold the entire dimension pending a documented resolution. A third vote must not silently average away disagreement.
-
-```text
-dimension score = 25 * mean(artifact reviewer means)
-overall quality = 100 * geometric_mean(five dimension scores / 100)
-```
-
-Round public scores to one decimal. All five dimensions must qualify before publishing the overall score. Null is not zero and weights are not redistributed around missing dimensions. A substantiated zero dimension produces zero overall; do not confuse this with an unknown dimension.
-
-Equal dimension weights are a declared normative choice. The geometric mean reduces compensation between weaknesses and strengths. This is a descriptive assessment of the reviewed portfolio, not a calibrated prediction of job performance. Review dates and sample counts remain visible; old quality evidence is not automatically decayed.
-
-## Review process
-
-`data/work-reviews.json` contains maintainer-curated records. It begins empty. No automated LLM evaluation, fabricated reviews, or public rating submissions are enabled.
-
-1. Assemble a documented pool of the contributor's work. Include representative randomly selected samples and contributor-selected examples; record the selection process in the review rationale. Avoid sampling only popular projects or only a developer's best work.
-2. Have two reviewers with relevant domain knowledge inspect each artifact independently, ideally before seeing the other's score. Reviewers must disclose conflicts; maintainer verification of identity and independence is required. Different usernames alone do not establish independence.
-3. Use a stable artifact identifier for a single underlying change or outcome. Mirrors, cherry-picks, commits split from the same change, and multiple URLs to the same artifact are one sample. Maintainers must enforce this semantic identity; automatic metadata deduplication cannot prove it.
-4. Record one assessment per username/artifact/dimension/reviewer. Scores are integers 0–4. Include a public GitHub evidence link, substantive rationale, and UTC review timestamp.
-5. Submit records through a reviewed repository change. Self-reviews, duplicate reviewer entries (case-insensitive), unsafe URLs, invalid scores, and future dates are rejected. The public service only reads this deployed file.
-6. Resolve material disagreement through additional investigation and a visible correction, not by adding favorable votes. Contributors may contest factual mistakes using evidence. Preserve discussion and change history.
-7. Reassess or withdraw records when their supporting evidence is invalidated. Do not infer loss of capability merely from inactivity.
-
-Example record shape (illustrative only; do not publish as a real review):
-
-```json
-{
-  "username": "developer",
-  "artifact": "owner/repository:pull:123",
-  "dimension": "correctness",
-  "reviewer": "independent-reviewer",
-  "score": 2,
-  "evidenceUrl": "https://github.com/owner/repository/pull/123",
-  "rationale": "Describe the requirements, inspected behavior, evidence, sampling context, and remaining limits.",
-  "reviewedAt": "2026-10-02T12:00:00.000Z"
-}
-```
-
-Every record is public once committed. Do not put confidential work or sensitive review details in this file. Supporting private assessments requires a separate authenticated consent and access-control system; it is not implemented here.
-
-## Validation before stronger claims
-
-Implemented tests verify algorithmic invariants, exact arithmetic, spoofed/duplicate activity, counterpart caps, solo/review track equivalence, incomplete data, privacy filtering, API recovery, caching, and rubric gates. These are synthetic tests; they do not establish empirical skill validity.
-
-Before presenting scores as reliable ability estimates:
-
-- Recruit a consented benchmark spanning solo maintainers, team contributors, newcomers, documentation specialists, research developers, and people with substantial private work.
-- Have multiple domain-appropriate reviewers assess representative artifacts while blinded to stars and existing rank.
-- Measure inter-rater agreement, disagreement rates, missing-evidence rates, and group-specific coverage.
-- Split calibration and evaluation by contributor and repository, with a temporal holdout to reduce leakage. Keep related changes together.
-- Test rank/score sensitivity to weights, caps, sampling selection, role, language ecosystem, and project size. Publish failures and uncertainty, not just aggregate correlation.
-- Include controlled gaming cases and check that claims remain bounded by the available evidence.
-- Version any changed formula, publish calibration data provenance where consent allows, and retain the prior version's interpretation.
-
-No benchmark has been collected or validated as part of this implementation. Statistical confidence, a universal skill percentile, Sybil-proof identity, and objective overall ability claims remain unsupported.
+This dampens volume, duplicate reviews, owner splitting and repeated partners.
+It does not inspect code quality or prove collusion, and it cannot reliably
+identify coordinated accounts owned by one person. Multiple owners/partners,
+star purchases, and adding many low-score accounts to the visitor population
+remain possible attacks. The comparison pool includes visitors as requested,
+so its combined distribution is not a statistically representative global
+survey. A large trusted sampling-only reference could mitigate that separately.
+Bounded observations can undercount prolific contributors; focused solo work
+can receive less game credit than broad collaboration. No private work is inferred.

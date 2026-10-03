@@ -89,10 +89,13 @@ export interface RankResult {
   /** Percentile ranking (0 - 100) */
   percentile: number;
 
+  /** Zero means population comparison is unavailable; keep the game rank. */
+  populationSize?: number;
+
   /** Weighted Performance Index - raw score before transformation */
   wpi: number;
 
-  /** Z-score - standard deviations from global mean */
+  /** Legacy score-curve coordinate; empirical population ranking uses percentile */
   zScore: number;
 }
 

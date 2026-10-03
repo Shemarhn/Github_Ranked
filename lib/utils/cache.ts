@@ -26,7 +26,7 @@ export const CACHE_TTL = {
  * Cache key prefixes for different data types
  */
 export const CACHE_PREFIX = {
-  RANK: 'rank',
+  RANK: 'rank-v4',
   YEAR_STATS: 'year',
   USER: 'user',
 } as const;

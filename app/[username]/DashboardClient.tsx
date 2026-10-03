@@ -9,6 +9,7 @@ import {
   MAX_STARS_CAP,
   TIER_COLORS,
 } from '@/lib/ranking/constants';
+import { scoreBreakdown } from '@/lib/ranking/scoring';
 import styles from './dashboard.module.css';
 
 interface DashboardClientProps {
@@ -29,38 +30,38 @@ export default function DashboardClient({
   const tierLabel = rank.division ? `${rank.tier} ${rank.division}` : rank.tier;
   const topPercent = Math.max(0, 100 - rank.percentile);
 
+  const scores = scoreBreakdown(stats);
   // Calculate GP breakdown for display
   const gpBreakdown = {
     mergedPRs: {
       count: stats.totalMergedPRs,
       weight: METRIC_WEIGHTS.mergedPRs,
-      contribution: stats.totalMergedPRs * METRIC_WEIGHTS.mergedPRs,
+      contribution: scores.mergedPRs,
     },
     codeReviews: {
       count: stats.totalCodeReviews,
       weight: METRIC_WEIGHTS.codeReviews,
-      contribution: stats.totalCodeReviews * METRIC_WEIGHTS.codeReviews,
+      contribution: scores.codeReviews,
     },
     issuesClosed: {
       count: stats.totalIssuesClosed,
       weight: METRIC_WEIGHTS.issuesClosed,
-      contribution: stats.totalIssuesClosed * METRIC_WEIGHTS.issuesClosed,
+      contribution: scores.issuesClosed,
     },
     commits: {
       count: stats.totalCommits,
       weight: METRIC_WEIGHTS.commits,
-      contribution: stats.totalCommits * METRIC_WEIGHTS.commits,
+      contribution: scores.commits,
     },
     stars: {
       count: stats.totalStars,
       weight: METRIC_WEIGHTS.stars,
-      contribution:
-        Math.min(stats.totalStars, MAX_STARS_CAP) * METRIC_WEIGHTS.stars,
+      contribution: scores.stars,
     },
   };
 
-  const rankCardUrl = `/api/rank/${username}?force=true&v=${rank.elo}&stars=${stats.totalStars}`;
-  const embedCode = `![GitHub Rank](https://github-ranked.vercel.app/api/rank/${username}?force=true)`;
+  const rankCardUrl = `/api/rank/${username}?v=4`;
+  const embedCode = `![GitHub Rank](https://github-ranked.vercel.app/api/rank/${username})`;
 
   return (
     <main className={styles.dashboard}>
@@ -79,15 +80,28 @@ export default function DashboardClient({
           {tierLabel} - {rank.elo.toLocaleString()} Rating
         </p>
         <p className={styles.percentile}>
-          Percentile {rank.percentile.toFixed(1)} (Top {topPercent.toFixed(1)}%)
+          {rank.populationSize ? (
+            <>
+              Ahead of {rank.percentile.toFixed(2)}% · Top{' '}
+              {topPercent.toFixed(2)}% of {rank.populationSize.toLocaleString()}{' '}
+              cached profiles
+            </>
+          ) : (
+            'Score-based rank · population comparison temporarily unavailable'
+          )}
         </p>
       </section>
 
       {/* GP Breakdown */}
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Git Points Breakdown</h2>
+        <h2 className={styles.sectionTitle}>Score Breakdown</h2>
         <p className={styles.wpiTotal}>
           Total WPI: <strong>{rank.wpi.toLocaleString()}</strong>
+        </p>
+        <p>
+          Game points use diminishing returns and reduced credit for repeated
+          interactions. Counts below are adjusted public contribution units.{' '}
+          {stats.sampled ? 'Some years exceed the observation limits.' : ''}
         </p>
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
@@ -95,13 +109,13 @@ export default function DashboardClient({
               <tr>
                 <th>Metric</th>
                 <th>Count</th>
-                <th>Weight</th>
+                <th>Multiplier</th>
                 <th>Contribution</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Merged PRs</td>
+                <td>Merged PR credit</td>
                 <td>{gpBreakdown.mergedPRs.count.toLocaleString()}</td>
                 <td>x{gpBreakdown.mergedPRs.weight}</td>
                 <td className={styles.contribution}>
@@ -109,7 +123,7 @@ export default function DashboardClient({
                 </td>
               </tr>
               <tr>
-                <td>Code Reviews</td>
+                <td>Review credit</td>
                 <td>{gpBreakdown.codeReviews.count.toLocaleString()}</td>
                 <td>x{gpBreakdown.codeReviews.weight}</td>
                 <td className={styles.contribution}>
@@ -117,7 +131,7 @@ export default function DashboardClient({
                 </td>
               </tr>
               <tr>
-                <td>Issues Closed</td>
+                <td>Closed authored issue credit</td>
                 <td>{gpBreakdown.issuesClosed.count.toLocaleString()}</td>
                 <td>x{gpBreakdown.issuesClosed.weight}</td>
                 <td className={styles.contribution}>
@@ -184,7 +198,7 @@ export default function DashboardClient({
               </tr>
             </thead>
             <tbody>
-              {stats.decayedYearlyBreakdown
+              {[...stats.decayedYearlyBreakdown]
                 .sort((a, b) => b.year - a.year)
                 .map((year) => {
                   const raw = stats.yearlyBreakdown.find(
@@ -227,7 +241,7 @@ export default function DashboardClient({
       {/* Footer */}
       <footer className={styles.footer}>
         <a
-          href="https://github.com/anthropics/claude-code"
+          href="https://github.com/Shemarhn/Github_Ranked"
           target="_blank"
           rel="noopener noreferrer"
         >

@@ -37,9 +37,7 @@ describe('Ranking Engine - calculateWPI', () => {
 
     const wpi = calculateWPI(stats);
 
-    // Expected: (50*35) + (30*35) + (20*15) + (100*10) + (250*5)
-    //         = 1750 + 1050 + 300 + 1000 + 1250 = 5350
-    expect(wpi).toBe(5350);
+    expect(wpi).toBe(3702.7);
   });
 
   it('should cap stars at 1000', () => {
@@ -57,8 +55,7 @@ describe('Ranking Engine - calculateWPI', () => {
 
     const wpi = calculateWPI(stats);
 
-    // Expected: 1000 * 5 = 5000 (stars capped at 1000)
-    expect(wpi).toBe(5000);
+    expect(wpi).toBe(1198.95);
   });
 
   it('should return minimum WPI of 1 for zero contributions', () => {
@@ -96,23 +93,23 @@ describe('Ranking Engine - calculateWPI', () => {
 
     // Test merged PRs weight (35)
     const wpiPRs = calculateWPI({ ...baseStat, totalMergedPRs: 10 });
-    expect(wpiPRs).toBe(350);
+    expect(wpiPRs).toBe(319.06);
 
     // Test code reviews weight (35)
     const wpiReviews = calculateWPI({ ...baseStat, totalCodeReviews: 10 });
-    expect(wpiReviews).toBe(350);
+    expect(wpiReviews).toBe(319.06);
 
     // Test issues weight (15)
     const wpiIssues = calculateWPI({ ...baseStat, totalIssuesClosed: 10 });
-    expect(wpiIssues).toBe(150);
+    expect(wpiIssues).toBe(129.46);
 
     // Test commits weight (10)
     const wpiCommits = calculateWPI({ ...baseStat, totalCommits: 10 });
-    expect(wpiCommits).toBe(100);
+    expect(wpiCommits).toBe(97.58);
 
     // Test stars weight (5)
     const wpiStars = calculateWPI({ ...baseStat, totalStars: 10 });
-    expect(wpiStars).toBe(50);
+    expect(wpiStars).toBe(47.66);
   });
 
   it('should handle exactly 1000 stars without capping', () => {
@@ -130,8 +127,7 @@ describe('Ranking Engine - calculateWPI', () => {
 
     const wpi = calculateWPI(stats);
 
-    // Expected: 1000 * 5 = 5000
-    expect(wpi).toBe(5000);
+    expect(wpi).toBe(1198.95);
   });
 
   it('should handle large numbers correctly', () => {
@@ -149,9 +145,7 @@ describe('Ranking Engine - calculateWPI', () => {
 
     const wpi = calculateWPI(stats);
 
-    // Expected: (1000*35) + (500*35) + (300*15) + (10000*10) + (500*5)
-    //         = 35000 + 17500 + 4500 + 100000 + 2500 = 159500
-    expect(wpi).toBe(159500);
+    expect(wpi).toBe(19362.81);
   });
 
   it('should prioritize collaboration metrics over commits', () => {
@@ -182,29 +176,19 @@ describe('Ranking Engine - calculateWPI', () => {
     const wpiCollaborative = calculateWPI(collaborativeStats);
     const wpiCommitHeavy = calculateWPI(commitHeavyStats);
 
-    // Collaborative work should be valued higher
-    // Collaborative: (100*35) + (100*35) = 7000
-    // Commit-heavy: (699*10) = 6990
-    expect(wpiCollaborative).toBe(7000);
-    expect(wpiCommitHeavy).toBe(6990);
-
-    // Verify that collaboration is rewarded more than pure commits
-    // With new weights: 50 PRs + 50 reviews = 50*35 + 50*35 = 3500
-    // To match that with commits: 3500/10 = 350 commits
-    const betterCollaborative = calculateWPI({
+    expect(wpiCollaborative).toBeGreaterThan(wpiCommitHeavy);
+    // Adding another 100 reviews yields fewer points than the first 100.
+    const doubled = calculateWPI({
       ...collaborativeStats,
-      totalMergedPRs: 50,
-      totalCodeReviews: 50,
+      totalCodeReviews: 200,
     });
-    const moreCommits = calculateWPI({
-      ...commitHeavyStats,
-      totalCommits: 350,
+    const noReviews = calculateWPI({
+      ...collaborativeStats,
+      totalCodeReviews: 0,
     });
-
-    // 50*35 + 50*35 = 3500
-    // 350*10 = 3500
-    expect(betterCollaborative).toBe(3500);
-    expect(moreCommits).toBe(3500);
+    expect(doubled - wpiCollaborative).toBeLessThan(
+      wpiCollaborative - noReviews
+    );
   });
 
   it('should ignore followers in WPI calculation', () => {
@@ -1160,9 +1144,13 @@ describe('Ranking Engine - calculateRank (Integration)', () => {
     const rank = calculateRank(stats);
 
     // High performer should be in upper tiers
-    expect(['Diamond', 'Master', 'Grandmaster', 'Challenger']).toContain(
-      rank.tier
-    );
+    expect([
+      'Emerald',
+      'Diamond',
+      'Master',
+      'Grandmaster',
+      'Challenger',
+    ]).toContain(rank.tier);
     expect(rank.elo).toBeGreaterThan(1800);
     expect(rank.percentile).toBeGreaterThan(80);
   });

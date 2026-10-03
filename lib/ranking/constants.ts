@@ -9,10 +9,7 @@ import type { Tier } from './types';
 // Algorithm Constants
 // ============================================================================
 
-/**
- * Mean of log-transformed global developer activity
- * Derived from GitClear research on global GitHub activity distribution
- */
+/** Fixed game curve used only when the comparison population is unavailable. */
 export const MEAN_LOG_SCORE = 6.5;
 
 /**
@@ -21,7 +18,7 @@ export const MEAN_LOG_SCORE = 6.5;
 export const STD_DEV = 1.5;
 
 /**
- * Base Elo rating - represents median developer (Gold IV)
+ * Center of the legacy fallback game curve (Gold IV)
  */
 export const BASE_ELO = 1200;
 
@@ -34,28 +31,21 @@ export const ELO_PER_SIGMA = 400;
 // Metric Weights
 // ============================================================================
 
-/**
- * Weights for calculating Weighted Performance Index (WPI)
- * Normalized to 100% total - higher weights = more valuable signal
- *
- * v3.0 weights heavily prioritize collaboration (PRs + Reviews = 70%)
- * This makes reaching Diamond+ impossible without peer interactions.
- * Commits are minimized to prevent "farming" tactics.
- */
+/** Game multipliers applied after diminishing returns; not percentages of skill. */
 export const METRIC_WEIGHTS = {
-  /** Merged Pull Requests - peer acceptance, collaboration (35%) */
+  /** Merged PR credit multiplier */
   mergedPRs: 35,
 
-  /** Code Reviews - seniority signal, mentorship (35%) */
+  /** Submitted review credit multiplier */
   codeReviews: 35,
 
-  /** Issues Closed - problem-solving (15%) */
+  /** Closed authored issue credit multiplier */
   issuesClosed: 15,
 
-  /** Commits - activity indicator (low to prevent farming) (10%) */
+  /** Public commit credit multiplier */
   commits: 10,
 
-  /** Stars - open source impact (capped at 1k) (5%) */
+  /** Repository stars multiplier (capped at 1k) */
   stars: 5,
 } as const;
 

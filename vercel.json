@@ -37,5 +37,11 @@
       "source": "/badge/:username",
       "destination": "/api/rank/:username"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/population",
+      "schedule": "17 5 * * *"
+    }
   ]
 }

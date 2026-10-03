@@ -14,6 +14,7 @@
 export const USER_STATS_QUERY = `
 query UserStats($login: String!, $from: DateTime!, $to: DateTime!) {
   user(login: $login) {
+    id
     login
     name
     createdAt
@@ -23,6 +24,25 @@ query UserStats($login: String!, $from: DateTime!, $to: DateTime!) {
       totalPullRequestReviewContributions
       totalIssueContributions
       restrictedContributionsCount
+      commitContributionsByRepository(maxRepositories: 100) {
+        repository { isPrivate owner { login } }
+        contributions(first: 100) { nodes { commitCount } pageInfo { hasNextPage } }
+      }
+      pullRequestContributions(first: 100, orderBy: { direction: DESC }) {
+        pageInfo { hasNextPage }
+        nodes { pullRequest { id merged author { login __typename } mergedBy { login } repository { isPrivate owner { login } } } }
+      }
+      pullRequestReviewContributions(first: 100, orderBy: { direction: DESC }) {
+        pageInfo { hasNextPage }
+        nodes {
+          pullRequest { id merged author { login __typename } mergedBy { login } repository { isPrivate owner { login } } }
+          pullRequestReview { state }
+        }
+      }
+      issueContributions(first: 100, orderBy: { direction: DESC }) {
+        pageInfo { hasNextPage }
+        nodes { issue { id closed repository { isPrivate owner { login } } } }
+      }
     }
     followers {
       totalCount
@@ -30,6 +50,8 @@ query UserStats($login: String!, $from: DateTime!, $to: DateTime!) {
     repositories(
       first: 100
       ownerAffiliations: OWNER
+      privacy: PUBLIC
+      isFork: false
       orderBy: { field: STARGAZERS, direction: DESC }
     ) {
       totalCount
@@ -59,6 +81,7 @@ query UserStats($login: String!, $from: DateTime!, $to: DateTime!) {
 export const CONTRIBUTION_YEARS_QUERY = `
 query ContributionYears($login: String!) {
   user(login: $login) {
+    id
     login
     createdAt
     contributionsCollection {
@@ -138,4 +161,21 @@ export function getYearDates(year: number): { from: Date; to: Date } {
   const to = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
 
   return { from, to };
+}
+
+/** Metadata-only request avoids refetching a full contribution sample. */
+export function buildUserMetaQuery(username: string): GraphQLRequest {
+  return {
+    query: `query UserMeta($login: String!) {
+      user(login: $login) {
+        id
+        followers { totalCount }
+        repositories(first: 100, ownerAffiliations: OWNER, privacy: PUBLIC, isFork: false, orderBy: { field: STARGAZERS, direction: DESC }) {
+          nodes { stargazers { totalCount } }
+        }
+      }
+      rateLimit { limit cost remaining resetAt }
+    }`,
+    variables: { login: username },
+  };
 }

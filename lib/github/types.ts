@@ -44,6 +44,8 @@ export interface ContributionsCollection {
  * Statistics for a single year
  */
 export interface YearlyStats {
+  sampled?: boolean;
+  userId?: string;
   year: number;
   commits: number;
   prs: number;
@@ -56,6 +58,8 @@ export interface YearlyStats {
  * Aggregated statistics across all years
  */
 export interface AggregatedStats {
+  sampled?: boolean;
+  userId?: string;
   totalCommits: number;
   totalMergedPRs: number;
   totalCodeReviews: number;

@@ -3,11 +3,16 @@
  * Fetches and aggregates GitHub contribution statistics
  */
 
+import {
+  scorePublicContributions,
+  type PublicContributions,
+} from './contributionScore';
 import { GitHubAPIError, UserNotFoundError } from '@/lib/utils/errors';
 import { getSeasonalDecayMultiplier } from '@/lib/ranking/constants';
 import { TokenPoolManager } from './tokenPool';
 import {
   buildContributionYearsQuery,
+  buildUserMetaQuery,
   buildUserStatsQuery,
   getYearDates,
 } from './queries';
@@ -25,6 +30,7 @@ import type {
 
 interface ContributionYearsResponse {
   user: {
+    id?: string;
     contributionsCollection: {
       contributionYears?: number[];
     };
@@ -34,7 +40,8 @@ interface ContributionYearsResponse {
 
 interface UserStatsResponse {
   user: {
-    contributionsCollection: {
+    id?: string;
+    contributionsCollection: PublicContributions & {
       totalCommitContributions: number;
       totalPullRequestContributions: number;
       totalPullRequestReviewContributions: number;
@@ -47,6 +54,7 @@ interface UserStatsResponse {
 
 interface UserMetaResponse {
   user: {
+    id?: string;
     followers: {
       totalCount: number;
     };
@@ -167,13 +175,16 @@ export async function fetchYearlyStats(
 
   const collection = data.user.contributionsCollection;
 
+  const publicStats = scorePublicContributions(collection, username);
   return {
     year,
-    commits: collection.totalCommitContributions,
-    prs: collection.totalPullRequestContributions,
-    reviews: collection.totalPullRequestReviewContributions,
-    issues: collection.totalIssueContributions,
-    privateContributions: collection.restrictedContributionsCount,
+    userId: data.user.id,
+    commits: publicStats.commits,
+    prs: publicStats.prs,
+    reviews: publicStats.reviews,
+    issues: publicStats.issues,
+    privateContributions: 0,
+    ...(publicStats.sampled ? { sampled: true } : {}),
   };
 }
 
@@ -192,11 +203,9 @@ const getCurrentYear = (): number => new Date().getUTCFullYear();
 const fetchUserMeta = async (
   username: string,
   token?: string
-): Promise<{ totalStars: number; totalFollowers: number }> => {
-  const currentYear = getCurrentYear();
-  const { from, to } = getYearDates(currentYear);
+): Promise<{ totalStars: number; totalFollowers: number; userId?: string }> => {
   const resolved = resolveToken(token);
-  const request = buildUserStatsQuery(username, from, to);
+  const request = buildUserMetaQuery(username);
   const response = await executeGraphQLQueryWithRetry<UserMetaResponse>(
     request,
     resolved.token
@@ -210,6 +219,7 @@ const fetchUserMeta = async (
   }
 
   return {
+    userId: data.user.id,
     totalStars: sumStars(data.user.repositories.nodes),
     totalFollowers: data.user.followers.totalCount,
   };
@@ -286,7 +296,10 @@ export async function aggregateAllTimeStats(
   token?: string
 ): Promise<AggregatedStats> {
   const years = await fetchContributionYears(username, token);
-  const { totalStars, totalFollowers } = await fetchUserMeta(username, token);
+  const { totalStars, totalFollowers, userId } = await fetchUserMeta(
+    username,
+    token
+  );
   const currentYear = getCurrentYear();
 
   if (years.length === 0) {
@@ -295,6 +308,7 @@ export async function aggregateAllTimeStats(
       totalMergedPRs: 0,
       totalCodeReviews: 0,
       totalIssuesClosed: 0,
+      userId,
       totalStars,
       totalFollowers,
       firstContributionYear: currentYear,
@@ -303,7 +317,16 @@ export async function aggregateAllTimeStats(
     };
   }
 
-  const { stats } = await fetchYearlyStatsForYears(username, years, token);
+  const { stats, failedYears } = await fetchYearlyStatsForYears(
+    username,
+    years,
+    token
+  );
+  // Never silently publish a deflated score into the comparison population.
+  if (failedYears.length)
+    throw new GitHubAPIError('Incomplete contribution history; please retry', {
+      failedYears,
+    });
 
   // Apply seasonal decay to each year's contributions
   const totals = stats.reduce(
@@ -322,10 +345,12 @@ export async function aggregateAllTimeStats(
   const sortedYears = stats.map((stat) => stat.year).sort((a, b) => a - b);
 
   return {
+    sampled: stats.some((year) => year.sampled),
     totalCommits: totals.commits,
     totalMergedPRs: totals.prs,
     totalCodeReviews: totals.reviews,
     totalIssuesClosed: totals.issues,
+    userId,
     totalStars,
     totalFollowers,
     firstContributionYear: sortedYears[0],
@@ -348,7 +373,10 @@ export async function aggregateAllTimeStatsExtended(
   token?: string
 ): Promise<ExtendedAggregatedStats> {
   const years = await fetchContributionYears(username, token);
-  const { totalStars, totalFollowers } = await fetchUserMeta(username, token);
+  const { totalStars, totalFollowers, userId } = await fetchUserMeta(
+    username,
+    token
+  );
   const currentYear = getCurrentYear();
 
   if (years.length === 0) {
@@ -357,6 +385,7 @@ export async function aggregateAllTimeStatsExtended(
       totalMergedPRs: 0,
       totalCodeReviews: 0,
       totalIssuesClosed: 0,
+      userId,
       totalStars,
       totalFollowers,
       firstContributionYear: currentYear,
@@ -367,7 +396,16 @@ export async function aggregateAllTimeStatsExtended(
     };
   }
 
-  const { stats } = await fetchYearlyStatsForYears(username, years, token);
+  const { stats, failedYears } = await fetchYearlyStatsForYears(
+    username,
+    years,
+    token
+  );
+  // Never silently publish a deflated score into the comparison population.
+  if (failedYears.length)
+    throw new GitHubAPIError('Incomplete contribution history; please retry', {
+      failedYears,
+    });
 
   // Create decayed yearly breakdown
   const decayedYearlyBreakdown = stats.map((yearStats) => {
@@ -399,10 +437,12 @@ export async function aggregateAllTimeStatsExtended(
   const sortedYears = stats.map((stat) => stat.year).sort((a, b) => a - b);
 
   return {
+    sampled: stats.some((year) => year.sampled),
     totalCommits: totals.commits,
     totalMergedPRs: totals.prs,
     totalCodeReviews: totals.reviews,
     totalIssuesClosed: totals.issues,
+    userId,
     totalStars,
     totalFollowers,
     firstContributionYear: sortedYears[0],

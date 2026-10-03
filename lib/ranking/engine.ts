@@ -2,11 +2,10 @@
  * Ranking Engine
  */
 
+import { scoreBreakdown } from './scoring';
 import type { AggregatedStats } from '@/lib/github/types';
 import type { Tier, Division, RankResult } from './types';
 import {
-  METRIC_WEIGHTS,
-  MAX_STARS_CAP,
   MEAN_LOG_SCORE,
   STD_DEV,
   BASE_ELO,
@@ -19,16 +18,11 @@ import {
 
 /** Calculate Weighted Performance Index from contribution metrics */
 export function calculateWPI(stats: AggregatedStats): number {
-  const cappedStars = Math.min(stats.totalStars, MAX_STARS_CAP);
-
-  const wpi =
-    stats.totalMergedPRs * METRIC_WEIGHTS.mergedPRs +
-    stats.totalCodeReviews * METRIC_WEIGHTS.codeReviews +
-    stats.totalIssuesClosed * METRIC_WEIGHTS.issuesClosed +
-    stats.totalCommits * METRIC_WEIGHTS.commits +
-    cappedStars * METRIC_WEIGHTS.stars;
-
-  return Math.max(wpi, 1);
+  const total = Object.values(scoreBreakdown(stats)).reduce(
+    (sum, value) => sum + value,
+    0
+  );
+  return Math.max(Math.round(total * 100) / 100, 1);
 }
 
 /** Calculate Z-Score (standard deviations from mean) */

@@ -30,7 +30,7 @@ vi.mock('@/lib/renderer/render', () => ({
   renderRankCard: vi.fn().mockResolvedValue('<svg></svg>'),
 }));
 
-import { GET } from '@/lib/ranking/legacy-route';
+import { GET } from '@/app/api/rank/[username]/route';
 import {
   aggregateAllTimeStats,
   fetchYearlyStats,
@@ -71,7 +71,7 @@ const createRequest = (url: string): NextRequest => {
   return new NextRequest(new URL(url, 'http://localhost'));
 };
 
-describe('Historical v1 route (not publicly routed)', () => {
+describe('API Route: GET /api/rank/[username]', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(getCachedRank).mockResolvedValue({

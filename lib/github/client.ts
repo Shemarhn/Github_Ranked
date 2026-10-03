@@ -34,7 +34,7 @@ export async function executeGraphQLQuery<T = unknown>(
     // Send POST request to GitHub GraphQL API
     const response = await fetch(GITHUB_GRAPHQL_ENDPOINT, {
       method: 'POST',
-      signal: AbortSignal.timeout(10_000),
+      signal: AbortSignal.timeout(15_000),
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,

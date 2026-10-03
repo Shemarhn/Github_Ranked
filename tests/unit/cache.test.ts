@@ -45,37 +45,37 @@ describe('Cache Key Generation', () => {
   describe('generateCacheKey', () => {
     it('should generate key with default options', () => {
       const key = generateCacheKey('octocat');
-      expect(key).toBe('rank:octocat:all:default');
+      expect(key).toBe('rank-v4:octocat:all:default');
     });
 
     it('should normalize username to lowercase', () => {
       const key = generateCacheKey('OctoCat');
-      expect(key).toBe('rank:octocat:all:default');
+      expect(key).toBe('rank-v4:octocat:all:default');
     });
 
     it('should trim whitespace from username', () => {
       const key = generateCacheKey('  octocat  ');
-      expect(key).toBe('rank:octocat:all:default');
+      expect(key).toBe('rank-v4:octocat:all:default');
     });
 
     it('should include season when provided', () => {
       const key = generateCacheKey('octocat', { season: 2024 });
-      expect(key).toBe('rank:octocat:2024:default');
+      expect(key).toBe('rank-v4:octocat:2024:default');
     });
 
     it('should include theme when provided', () => {
       const key = generateCacheKey('octocat', { theme: 'dark' });
-      expect(key).toBe('rank:octocat:all:dark');
+      expect(key).toBe('rank-v4:octocat:all:dark');
     });
 
     it('should include both season and theme', () => {
       const key = generateCacheKey('octocat', { season: 2024, theme: 'dark' });
-      expect(key).toBe('rank:octocat:2024:dark');
+      expect(key).toBe('rank-v4:octocat:2024:dark');
     });
 
     it('should handle season as "all"', () => {
       const key = generateCacheKey('octocat', { season: 'all' });
-      expect(key).toBe('rank:octocat:all:default');
+      expect(key).toBe('rank-v4:octocat:all:default');
     });
 
     it('should use correct prefix', () => {
@@ -340,7 +340,7 @@ describe('Cache TTL Constants', () => {
 
 describe('Cache Prefix Constants', () => {
   it('should have RANK prefix', () => {
-    expect(CACHE_PREFIX.RANK).toBe('rank');
+    expect(CACHE_PREFIX.RANK).toBe('rank-v4');
   });
 
   it('should have YEAR_STATS prefix', () => {

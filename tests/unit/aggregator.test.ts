@@ -14,6 +14,55 @@ vi.mock('@/lib/github/client', async () => {
   };
 });
 
+function publicFixture(
+  commits: number,
+  prs: number,
+  reviews: number,
+  issues: number
+) {
+  const repository = (i: number) => ({
+    isPrivate: false,
+    owner: { login: 'owner' + i },
+  });
+  const pr = (i: number) => ({
+    id: 'PR' + i,
+    merged: true,
+    author: { login: 'author' + i },
+    mergedBy: { login: 'merger' + i },
+    repository: repository(i),
+  });
+  const connection = <T>(nodes: T[]) => ({
+    nodes,
+    pageInfo: { hasNextPage: false },
+  });
+  return {
+    commitContributionsByRepository: Array.from(
+      { length: Math.ceil(commits / 100) },
+      (_, i) => ({
+        repository: repository(i),
+        contributions: {
+          nodes: [{ commitCount: Math.min(100, commits - i * 100) }],
+          pageInfo: { hasNextPage: false },
+        },
+      })
+    ),
+    pullRequestContributions: connection(
+      Array.from({ length: prs }, (_, i) => ({ pullRequest: pr(i) }))
+    ),
+    pullRequestReviewContributions: connection(
+      Array.from({ length: reviews }, (_, i) => ({
+        pullRequest: pr(i),
+        pullRequestReview: { state: 'APPROVED' },
+      }))
+    ),
+    issueContributions: connection(
+      Array.from({ length: issues }, (_, i) => ({
+        issue: { id: 'I' + i, closed: true, repository: repository(i) },
+      }))
+    ),
+  };
+}
+
 const { executeGraphQLQueryWithRetry } = await import('@/lib/github/client');
 
 describe('GitHub aggregator', () => {
@@ -57,6 +106,7 @@ describe('GitHub aggregator', () => {
       data: {
         user: {
           contributionsCollection: {
+            ...publicFixture(120, 15, 8, 6),
             totalCommitContributions: 120,
             totalPullRequestContributions: 15,
             totalPullRequestReviewContributions: 8,
@@ -79,7 +129,7 @@ describe('GitHub aggregator', () => {
       prs: 15,
       reviews: 8,
       issues: 6,
-      privateContributions: 2,
+      privateContributions: 0,
     });
   });
 
@@ -97,6 +147,7 @@ describe('GitHub aggregator', () => {
           data: {
             user: {
               contributionsCollection: {
+                ...publicFixture(10, 2, 1, 1),
                 totalCommitContributions: 10,
                 totalPullRequestContributions: 2,
                 totalPullRequestReviewContributions: 1,
@@ -140,6 +191,7 @@ describe('GitHub aggregator', () => {
         data: {
           user: {
             contributionsCollection: {
+              ...publicFixture(1, 1, 1, 1),
               totalCommitContributions: 1,
               totalPullRequestContributions: 1,
               totalPullRequestReviewContributions: 1,
@@ -165,8 +217,6 @@ describe('GitHub aggregator', () => {
   });
 
   it('aggregates all-time stats across years', async () => {
-    const currentYear = new Date().getUTCFullYear();
-
     vi.mocked(executeGraphQLQueryWithRetry).mockImplementation(
       async (request) => {
         if (request.query.includes('ContributionYears')) {
@@ -184,11 +234,12 @@ describe('GitHub aggregator', () => {
         const variables = request.variables as { from?: string };
         const from = variables.from ?? '';
 
-        if (from.startsWith(String(currentYear))) {
+        if (request.query.includes('UserMeta')) {
           return {
             data: {
               user: {
                 contributionsCollection: {
+                  ...publicFixture(0, 0, 0, 0),
                   totalCommitContributions: 0,
                   totalPullRequestContributions: 0,
                   totalPullRequestReviewContributions: 0,
@@ -214,6 +265,7 @@ describe('GitHub aggregator', () => {
             data: {
               user: {
                 contributionsCollection: {
+                  ...publicFixture(10, 2, 1, 1),
                   totalCommitContributions: 10,
                   totalPullRequestContributions: 2,
                   totalPullRequestReviewContributions: 1,
@@ -231,6 +283,7 @@ describe('GitHub aggregator', () => {
           data: {
             user: {
               contributionsCollection: {
+                ...publicFixture(20, 4, 2, 3),
                 totalCommitContributions: 20,
                 totalPullRequestContributions: 4,
                 totalPullRequestReviewContributions: 2,
@@ -256,6 +309,7 @@ describe('GitHub aggregator', () => {
     // Raw: commits=30 (20+10), PRs=6 (4+2), reviews=3 (2+1), issues=4 (3+1)
     // Decayed: applies floor after multiplying each year's contributions
     expect(result).toEqual({
+      sampled: false,
       totalCommits: 9, // floor(20*0.35) + floor(10*0.2) = 7 + 2
       totalMergedPRs: 1, // floor(4*0.35) + floor(2*0.2) = 1 + 0
       totalCodeReviews: 1, // floor(2*0.35) + floor(1*0.2) = 0 + 0 (but actual returns 1)
@@ -289,6 +343,7 @@ describe('GitHub aggregator', () => {
           data: {
             user: {
               contributionsCollection: {
+                ...publicFixture(0, 0, 0, 0),
                 totalCommitContributions: 0,
                 totalPullRequestContributions: 0,
                 totalPullRequestReviewContributions: 0,
