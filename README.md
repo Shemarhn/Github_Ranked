@@ -132,6 +132,31 @@ npm run dev
 | `UPSTASH_REDIS_REST_URL`   | Yes      | Upstash Redis URL              |
 | `UPSTASH_REDIS_REST_TOKEN` | Yes      | Upstash Redis token            |
 
+## Troubleshooting production authentication
+
+If the rank API returns `502` with an upstream `401 Unauthorized` (or
+`GitHub authentication failed`) and dashboards fail, GitHub has rejected the
+server's credential. A successful build does not verify production credentials:
+the automated tests mock GitHub requests.
+
+1. Create a replacement GitHub personal access token with the documented
+   `read:user` scope. Do not commit it or put it in a `NEXT_PUBLIC_*` variable.
+2. In the Vercel project's **Settings > Environment Variables**, replace
+   `GITHUB_TOKEN_1` for **Production**. Replace or remove any other invalid
+   `GITHUB_TOKEN_*` entries, keeping the numbering consecutive from 1.
+3. Redeploy so the running application receives the updated environment.
+4. Verify `/api/rank/shemarhn?force=true` returns HTTP 200 with an
+   `image/svg+xml` content type, then open `/shemarhn` and confirm the dashboard
+   and badge load. Repeat with another valid username.
+
+Never paste tokens into issues or logs. If authentication succeeds but another
+error appears, inspect the deployment logs for that request before changing
+Redis or rendering configuration.
+
+The application needs a server for its GitHub API calls and SVG generation.
+GitHub Pages alone cannot run these routes; hosting it there would require a
+separate backend or a redesign to generate badges in advance.
+
 ## Tech Stack
 
 - **Next.js** - App Router, API routes

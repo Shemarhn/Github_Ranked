@@ -163,7 +163,7 @@ describe('GitHub GraphQL Client', () => {
         status: 401,
         statusText: 'Unauthorized',
         json: async () => ({
-          errors: [{ message: 'Bad credentials' }],
+          message: 'Bad credentials',
         }),
       });
 
@@ -173,7 +173,9 @@ describe('GitHub GraphQL Client', () => {
 
       await expect(
         executeGraphQLQuery({ query: '', variables: {} }, 'ghp_invalid_token')
-      ).rejects.toThrow('Bad credentials');
+      ).rejects.toThrow(
+        'The service owner must replace the configured GitHub token and redeploy.'
+      );
     });
 
     it('should handle server errors (5xx)', async () => {

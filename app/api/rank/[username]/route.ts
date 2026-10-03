@@ -196,7 +196,7 @@ export async function GET(
     return NextResponse.json(body, {
       status,
       headers: {
-        ...getCacheHeaders(false, CACHE_TTL.ERROR),
+        'Cache-Control': 'no-store',
         'X-Request-Id': requestId,
       },
     });

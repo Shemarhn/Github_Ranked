@@ -49,8 +49,10 @@ export async function executeGraphQLQuery<T = unknown>(
     if (!response.ok) {
       // Extract error message from response
       const errorMessage =
-        data.errors?.[0]?.message ||
-        `HTTP ${response.status}: ${response.statusText}`;
+        response.status === 401
+          ? 'GitHub authentication failed. The service owner must replace the configured GitHub token and redeploy.'
+          : data.errors?.[0]?.message ||
+            `HTTP ${response.status}: ${response.statusText}`;
 
       throw new GitHubAPIError(errorMessage, {
         statusCode: response.status,

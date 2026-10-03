@@ -37,7 +37,11 @@ import {
 } from '@/lib/github/aggregator';
 import { getCachedRank, setCachedRank } from '@/lib/cache';
 import { renderRankCard } from '@/lib/renderer/render';
-import { UserNotFoundError, RateLimitError } from '@/lib/utils/errors';
+import {
+  UserNotFoundError,
+  RateLimitError,
+  GitHubAPIError,
+} from '@/lib/utils/errors';
 import type { AggregatedStats } from '@/lib/github/types';
 import type { RankResult } from '@/lib/ranking/types';
 
@@ -81,6 +85,27 @@ describe('API Route: GET /api/rank/[username]', () => {
   });
 
   describe('Successful Requests', () => {
+    it('does not cache upstream authentication failures and recovers on the next request', async () => {
+      vi.mocked(aggregateAllTimeStats).mockRejectedValueOnce(
+        new GitHubAPIError('GitHub authentication failed.', { statusCode: 401 })
+      );
+      const request = createRequest('http://localhost/api/rank/octocat');
+      const failed = await GET(request, {
+        params: Promise.resolve({ username: 'octocat' }),
+      });
+      expect(failed.status).toBe(502);
+      expect(failed.headers.get('Cache-Control')).toBe('no-store');
+      expect((await failed.json()).details.statusCode).toBe(401);
+      expect(setCachedRank).not.toHaveBeenCalled();
+      expect(renderRankCard).not.toHaveBeenCalled();
+
+      const recovered = await GET(request, {
+        params: Promise.resolve({ username: 'octocat' }),
+      });
+      expect(recovered.status).toBe(200);
+      expect(recovered.headers.get('Content-Type')).toBe('image/svg+xml');
+    });
+
     it('should return SVG for valid username', async () => {
       const request = createRequest('http://localhost/api/rank/octocat');
       const params = Promise.resolve({ username: 'octocat' });
