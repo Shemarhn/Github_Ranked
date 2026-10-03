@@ -1,172 +1,95 @@
 # GitHub Ranked
 
-> Competitive skill ratings for developers based on GitHub contributions
+Public contribution badges and evidence-based engineering profiles.
 
-[![CI](https://github.com/Shemarhn/Github_Ranked/actions/workflows/ci.yml/badge.svg)](https://github.com/Shemarhn/Github_Ranked/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+Version 2 separates **observable public activity** from **reviewed engineering quality**. It does not claim to measure a person's overall worth or percentile among all developers.
 
-GitHub Ranked analyzes your GitHub activity and generates a competitive tier badge — like ranking systems in games, but for your code contributions.
+## Use it
 
-![Example](https://github-ranked.vercel.app/api/rank/shemarhn)
-
-## Quick Start
-
-Add to your GitHub profile README:
+- Profile: `https://github-ranked.vercel.app/YOUR_USERNAME`
+- Badge: `https://github-ranked.vercel.app/api/rank/YOUR_USERNAME`
+- Full evidence JSON: `https://github-ranked.vercel.app/api/assessment/YOUR_USERNAME`
+- Formula and limitations: `/methodology`
 
 ```markdown
-![GitHub Rank](https://github-ranked.vercel.app/api/rank/YOUR_USERNAME)
+![Public contribution rating](https://github-ranked.vercel.app/api/rank/YOUR_USERNAME)
 ```
 
-## Dashboard
+Existing badge URLs continue to work, but now display the version 2 public contribution index rather than the old Elo-like estimate. A new cache namespace prevents mixing versions. Historical v1 code is retained for regression reference and is not publicly routed.
 
-View detailed stats breakdown at:
+### Parameters
 
-```
-https://github-ranked.vercel.app/{username}
-```
+| Parameter | Default | Meaning                                                                             |
+| --------- | ------- | ----------------------------------------------------------------------------------- |
+| theme     | default | SVG colors: default, dark, light, minimal, cyberpunk, ocean, forest, sunset, galaxy |
+| season    | recent  | Calendar year from 2010 through the current UTC year                                |
+| force     | false   | Bypass stored snapshot cache                                                        |
 
-The dashboard shows:
+Without a season, the window begins on the first day of the month eleven months before the current UTC month and ends at collection time. Historical scores do not change merely because a new year begins. Reviewed achievements do not automatically decay.
 
-- Full GP breakdown by metric
-- Seasonal contribution history with decay visualization
-- Raw vs. decayed stats toggle
-- Embed code for your README
+## Algorithm
 
-## Tiers
+The [full algorithm, rubric, and validation protocol](ALGORITHM.md) are part of the repository.
 
-| Tier        | Rating      | Percentile |
-| ----------- | ----------- | ---------- |
-| Iron        | 0 - 599     | Bottom 5%  |
-| Bronze      | 600 - 899   | 5 - 15%    |
-| Silver      | 900 - 1199  | 15 - 40%   |
-| Gold        | 1200 - 1499 | 40 - 65%   |
-| Platinum    | 1500 - 1699 | 65 - 80%   |
-| Emerald     | 1700 - 1999 | 80 - 90%   |
-| Diamond     | 2000 - 2399 | 90 - 97%   |
-| Master      | 2400 - 2599 | 97 - 99%   |
-| Grandmaster | 2600 - 2999 | 99 - 99.9% |
-| Challenger  | 3000+       | Top 0.1%   |
+The contribution index caps delivery observations at three distinct days per month across all repositories. Verified merged PRs and GitHub-eligible commit days are combined, so splitting work into many commits or PRs on the same day does not add points. Review participation is capped at one observation per other PR author per month, and three per month overall.
 
-Tiers below Master have divisions (IV to I).
+```text
+D = sum of monthly capped delivery days
+R = sum of monthly capped distinct PR authors reviewed
+M = months containing public evidence
 
-## API
-
-```
-GET /api/rank/{username}
+Contribution index = 80 × (1 − exp(−max(D, R) / 12)) + 20 × min(M / 6, 1)
 ```
 
-| Parameter | Default   | Description            |
-| --------- | --------- | ---------------------- |
-| `theme`   | `default` | Card theme (see below) |
-| `season`  | all-time  | Year (e.g., `2024`)    |
-| `force`   | `false`   | Bypass cache           |
+Delivery and review are alternative tracks, accommodating solo contributors and review specialists. At least three observed months and six capped observations on either track are needed. Sparse or incomplete collections receive **Unrated**, not a low-skill label. Each ten-point band maps to the familiar Iron–Challenger tiers. These are product-defined contribution bands, **not empirical population percentiles**.
 
-### Themes
+Stars, followers, raw commit totals, lines changed, and number of repositories earn no additional points. Opened PRs are not called merged PRs; opened issues are not called resolved issues.
 
-- `default` - GitHub dark
-- `dark` - Pure black
-- `light` - White/light mode
-- `minimal` - Transparent background
-- `cyberpunk` - Neon pink/cyan
-- `ocean` - Deep blue
-- `forest` - Green/nature
-- `sunset` - Warm orange/red
-- `galaxy` - Purple/cosmic
+### Engineering quality
 
-**Examples:**
+Correctness, judgment, ownership, collaboration, and impact are assessed from concrete work samples using a published 0–4 rubric. Each dimension needs at least three distinct artifacts, each assessed by two independent reviewers. Material disagreement withholds the affected dimension. Missing dimensions remain null. Only a complete five-dimension assessment produces an overall geometric-mean rubric score.
 
-```markdown
-![Rank](https://github-ranked.vercel.app/api/rank/octocat)
-![Rank](https://github-ranked.vercel.app/api/rank/octocat?theme=cyberpunk)
-![Rank](https://github-ranked.vercel.app/api/rank/octocat?theme=ocean)
-![Rank](https://github-ranked.vercel.app/api/rank/octocat?season=2024)
-```
+Reviews live in `data/work-reviews.json`, are curated through normal maintainer review, and cite evidence and explanations. The file starts empty intentionally: there are no invented assessments or automatic claims of skill. There is no public write endpoint. See [the review process](ALGORITHM.md#review-process) before adding entries.
 
-## How It Works
+## Local setup
 
-Your rank is calculated from:
-
-| Metric        | Weight | Reason                            |
-| ------------- | ------ | --------------------------------- |
-| Merged PRs    | 35%    | Code accepted by peers            |
-| Code Reviews  | 35%    | Mentorship, seniority signal      |
-| Issues Closed | 15%    | Problem-solving                   |
-| Commits       | 10%    | Activity (low to prevent farming) |
-| Stars         | 5%     | Open source impact (capped at 1k) |
-
-Collaboration metrics (PRs + Reviews) account for **70%** of your score, making it impossible to reach Diamond+ without peer interaction. The badge displays total stars, but calculations cap at 1,000.
-
-## Seasonal System
-
-GitHub Ranked uses a seasonal decay system inspired by competitive games like League of Legends:
-
-| Season Age     | Weight | Example (in 2026) |
-| -------------- | ------ | ----------------- |
-| Current Season | 100%   | 2026              |
-| Previous       | 60%    | 2025              |
-| 2 years ago    | 35%    | 2024              |
-| 3 years ago    | 20%    | 2023              |
-| 4+ years       | 10%    | 2022 and earlier  |
-
-This ensures your rank reflects recent activity while still rewarding consistent long-term contributions. At each new year, there's effectively a soft reset where your older contributions matter less.
-
-## Self-Hosting
-
-**Requirements:** Node.js 20+, GitHub PAT, Upstash Redis
+Node.js 20.9+ and a GitHub personal access token are required. Upstash Redis is optional but strongly recommended to avoid repeated GitHub requests.
 
 ```bash
-git clone https://github.com/Shemarhn/Github_Ranked.git
-cd Github_Ranked
-npm install
+npm ci
 cp .env.local.example .env.local
-# Add your tokens to .env.local
+# Set credentials in .env.local
 npm run dev
 ```
 
-**Environment Variables:**
+| Variable                 | Required | Purpose                                                   |
+| ------------------------ | -------- | --------------------------------------------------------- |
+| GITHUB_TOKEN_1           | Yes      | GitHub PAT; existing project configuration uses read:user |
+| GITHUB_TOKEN_2, etc.     | No       | Additional tokens, consecutively numbered                 |
+| UPSTASH_REDIS_REST_URL   | No       | Upstash REST endpoint                                     |
+| UPSTASH_REDIS_REST_TOKEN | No       | Matching read/write REST token                            |
 
-| Variable                   | Required | Description                    |
-| -------------------------- | -------- | ------------------------------ |
-| `GITHUB_TOKEN_1`           | Yes      | GitHub PAT (`read:user` scope) |
-| `GITHUB_TOKEN_2+`          | No       | Additional tokens for scaling  |
-| `UPSTASH_REDIS_REST_URL`   | Yes      | Upstash Redis URL              |
-| `UPSTASH_REDIS_REST_TOKEN` | Yes      | Upstash Redis token            |
+Private repositories are filtered even if the server credential can access them. Tokens never belong in `NEXT_PUBLIC_*` variables or source control.
 
-## Troubleshooting production authentication
+## Tests and build
 
-If the rank API returns `502` with an upstream `401 Unauthorized` (or
-`GitHub authentication failed`) and dashboards fail, GitHub has rejected the
-server's credential. A successful build does not verify production credentials:
-the automated tests mock GitHub requests.
+```bash
+npm run test:coverage -- --run
+npm run lint
+npm run format:check
+npm run type-check
+npm run build
+```
 
-1. Create a replacement GitHub personal access token with the documented
-   `read:user` scope. Do not commit it or put it in a `NEXT_PUBLIC_*` variable.
-2. In the Vercel project's **Settings > Environment Variables**, replace
-   `GITHUB_TOKEN_1` for **Production**. Replace or remove any other invalid
-   `GITHUB_TOKEN_*` entries, keeping the numbering consecutive from 1.
-3. Redeploy so the running application receives the updated environment.
-4. Verify `/api/rank/shemarhn?force=true` returns HTTP 200 with an
-   `image/svg+xml` content type, then open `/shemarhn` and confirm the dashboard
-   and badge load. Repeat with another valid username.
+The v2 tests exercise adversarial activity, input-order invariance, missing evidence, privacy filters, pagination limits, caching, API errors, rubric disagreement, and alternative working styles. Existing live GitHub integration tests require `GITHUB_TOKEN_1`; without it they are skipped. Automated tests establish implementation behavior, not empirical validity of a skill model.
 
-Never paste tokens into issues or logs. If authentication succeeds but another
-error appears, inspect the deployment logs for that request before changing
-Redis or rendering configuration.
+## Deployment and troubleshooting
 
-The application needs a server for its GitHub API calls and SVG generation.
-GitHub Pages alone cannot run these routes; hosting it there would require a
-separate backend or a redesign to generate badges in advance.
+The app requires server execution; GitHub Pages alone cannot host its routes. Vercel can deploy it as a Next.js application. The cold evidence scan issues 12 monthly requests plus up to four merged-PR search pages; results are cached for one hour, with up to three monthly requests in flight. Monthly collection limits withhold a rank instead of pretending the data is complete. In-process coalescing reduces duplicate requests; distributed abuse protection is still a hosting concern.
 
-## Tech Stack
+If badges return HTTP 502 with an upstream 401, replace invalid `GITHUB_TOKEN_*` credentials under the Vercel project's **Settings → Environment Variables → Production**, then redeploy. A passing build does not validate production credentials. Check any Redis authentication error separately against the database's matching REST URL/token.
 
-- **Next.js** - App Router, API routes
-- **Satori** - SVG generation
-- **Upstash Redis** - Caching
-- **GitHub GraphQL API** - Data source
-
-## Contributing
-
-PRs welcome. Fork, branch, commit, PR.
+After deploying, verify the profile, badge, and JSON endpoint for a known username. Confirm the badge says public contributions and has an algorithm version; inspect collection limitations before interpreting the result.
 
 ## License
 

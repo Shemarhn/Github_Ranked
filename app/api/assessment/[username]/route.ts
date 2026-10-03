@@ -8,5 +8,5 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ username: string }> }
 ) {
-  return assessmentResponse(request, (await params).username, 'svg');
+  return assessmentResponse(request, (await params).username, 'json');
 }

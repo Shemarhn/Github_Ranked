@@ -1,66 +1,67 @@
-import Image from 'next/image';
-import styles from './page.module.css';
+import Link from 'next/link';
+import styles from './assessment.module.css';
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
+    <main className={styles.page}>
+      <nav className={styles.nav}>
+        <span>GitHub Ranked</span>
+        <Link href="/methodology">How it works ↗</Link>
+      </nav>
+      <header className={styles.hero}>
+        <p className={styles.eyebrow}>
+          Public contributions. Visible evidence.
+        </p>
+        <h1>More context behind every rank.</h1>
+        <p>
+          A contribution badge with a transparent formula, plus an engineering
+          profile that says what is known — and what is not.
+        </p>
+      </header>
+      <section className={styles.card}>
+        <h2>Explore a developer profile</h2>
+        <form action="/lookup" method="get" className={styles.form}>
+          <label htmlFor="username">GitHub username</label>
+          <input
+            id="username"
+            name="username"
+            required
+            maxLength={39}
+            placeholder="shemarhn"
+            autoComplete="off"
+            pattern="[a-zA-Z0-9][a-zA-Z0-9-]{0,38}"
+          />
+          <button type="submit">View evidence profile</button>
+        </form>
+        {error && <p role="alert">Enter a valid GitHub username.</p>}
+        <Link href="/shemarhn">See an example profile ↗</Link>
+      </section>
+      <section className={styles.grid}>
+        <article className={styles.card}>
+          <h2>Activity has limits</h2>
           <p>
-            Looking for a starting point or more instructions? Head over to{' '}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{' '}
-            or the{' '}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{' '}
-            center.
+            Repeated activity is capped. Stars, followers, and raw commit totals
+            do not increase your score.
           </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        </article>
+        <article className={styles.card}>
+          <h2>Quality needs evidence</h2>
+          <p>
+            Correctness, judgment, ownership, collaboration, and impact require
+            reviewed work samples. Private or missing work is never treated as
+            proof of low ability.
+          </p>
+        </article>
+      </section>
+      <p className={styles.muted}>
+        Version 2 is experimental. Ratings describe available evidence, not a
+        person’s worth or a hiring verdict.
+      </p>
+    </main>
   );
 }

@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'GitHub Ranked - Competitive Rankings for Developers',
+  title: 'GitHub Ranked - Public Contributions and Engineering Evidence',
   description:
-    'Transform your GitHub contributions into competitive gaming-style ranks. Track your progress from Iron to Challenger.',
+    'Explore a transparent public contribution rating and an engineering profile grounded in reviewed work. Missing evidence stays unknown.',
 };
 
 export default function RootLayout({
